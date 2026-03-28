@@ -1,47 +1,35 @@
 package com.den4dr.share2Obsidian
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.den4dr.share2Obsidian.ui.theme.Share2ObsidianTheme
+import androidx.core.net.toUri
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            Share2ObsidianTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+        if (intent?.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
+            val sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT) ?: ""
+
+            val content = if (sharedTitle.isNotEmpty()) "# $sharedTitle\n\n$sharedText" else sharedText
+
+            val obsidianUri = "obsidian://new".toUri()
+                .buildUpon()
+                .appendQueryParameter("content", content)
+                .build()
+
+            try {
+                startActivity(Intent(Intent.ACTION_VIEW, obsidianUri))
+            } catch (_: android.content.ActivityNotFoundException) {
+                Toast.makeText(this, "Obsidian がインストールされていません", Toast.LENGTH_LONG).show()
             }
+        } else {
+            Toast.makeText(this, "テキストを共有してください", Toast.LENGTH_SHORT).show()
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Share2ObsidianTheme {
-        Greeting("Android")
+        finish()
     }
 }
