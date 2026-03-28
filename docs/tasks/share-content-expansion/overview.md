@@ -54,8 +54,8 @@
 
 ### タスク一覧
 
-- [ ] [TASK-0001: 依存パッケージ追加とプロジェクト設定](TASK-0001.md) - 4h (DIRECT) 🔵
-- [ ] [TASK-0002: ShareContentデータクラス・インターフェース定義](TASK-0002.md) - 4h (DIRECT) 🔵
+- [x] [TASK-0001: 依存パッケージ追加とプロジェクト設定](TASK-0001.md) - 4h (DIRECT) 🔵
+- [x] [TASK-0002: ShareContentデータクラス・インターフェース定義](TASK-0002.md) - 4h (DIRECT) 🔵
 
 ### 依存関係
 
