@@ -154,7 +154,7 @@ TASK-0002 → TASK-0012
 
 ### タスク一覧
 
-- [ ] [TASK-0013: MainActivity統合リファクタリング](TASK-0013.md) - 4h (TDD) 🔵
+- [x] [TASK-0013: MainActivity統合リファクタリング](TASK-0013.md) - 4h (TDD) 🔵
 - [ ] [TASK-0014: strings.xmlとエラーハンドリング追加](TASK-0014.md) - 4h (DIRECT) 🔵
 
 ### 依存関係

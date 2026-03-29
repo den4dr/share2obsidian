@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Share2Obsidian</string>
+    <string name="error_obsidian_not_installed">Obsidian がインストールされていません</string>
 </resources>
