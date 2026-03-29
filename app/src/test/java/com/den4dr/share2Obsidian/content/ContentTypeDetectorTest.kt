@@ -24,7 +24,7 @@ class ContentTypeDetectorTest {
     ): Intent = Intent(Intent.ACTION_SEND).apply {
         type = mimeType
         text?.let { putExtra(Intent.EXTRA_TEXT, it) }
-        htmlText?.let { putExtra("android.intent.extra.HTML_TEXT", it) }
+        htmlText?.let { putExtra(Intent.EXTRA_HTML_TEXT, it) }
         subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) }
         stream?.let { putExtra(Intent.EXTRA_STREAM, it) }
     }

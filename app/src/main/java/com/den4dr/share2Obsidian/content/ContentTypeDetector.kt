@@ -12,14 +12,15 @@ object ContentTypeDetector {
 
         return when {
             mimeType == "text/html" -> {
-                val html = intent.getStringExtra("android.intent.extra.HTML_TEXT")
+                val html = intent.getStringExtra(Intent.EXTRA_HTML_TEXT)
                 val fallback = intent.getStringExtra(Intent.EXTRA_TEXT) ?: ""
                 ShareContent.Html(html = html, fallbackText = fallback, title = title)
             }
             mimeType == "text/plain" -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT) ?: return null
-                if (URL_PATTERN.matches(text.trim())) {
-                    ShareContent.Url(url = text.trim(), title = title)
+                val trimmed = text.trim()
+                if (URL_PATTERN.matches(trimmed)) {
+                    ShareContent.Url(url = trimmed, title = title)
                 } else {
                     ShareContent.Text(text = text, title = title)
                 }
