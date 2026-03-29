@@ -91,7 +91,7 @@ TASK-0002 → TASK-0004
 
 ### タスク一覧
 
-- [ ] [TASK-0005: ContentTypeDetector実装とテスト](TASK-0005.md) - 4h (TDD) 🔵
+- [x] [TASK-0005: ContentTypeDetector実装とテスト](TASK-0005.md) - 4h (TDD) 🔵
 - [ ] [TASK-0006: TextContentProcessor実装とテスト](TASK-0006.md) - 4h (TDD) 🔵
 - [ ] [TASK-0007: HtmlToMarkdownConverter実装とテスト](TASK-0007.md) - 4h (TDD) 🔵
 
