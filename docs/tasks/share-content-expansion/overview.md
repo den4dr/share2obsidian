@@ -113,8 +113,8 @@ TASK-0002 → TASK-0007
 
 ### タスク一覧
 
-- [ ] [TASK-0008: HtmlContentProcessor実装とテスト](TASK-0008.md) - 4h (TDD) 🔵
-- [ ] [TASK-0009: FileContentProcessor実装とテスト](TASK-0009.md) - 4h (TDD) 🔵
+- [x] [TASK-0008: HtmlContentProcessor実装とテスト](TASK-0008.md) - 4h (TDD) 🔵
+- [x] [TASK-0009: FileContentProcessor実装とテスト](TASK-0009.md) - 4h (TDD) 🔵
 
 ### 依存関係
 
@@ -132,9 +132,9 @@ TASK-0002 → TASK-0009
 
 ### タスク一覧
 
-- [ ] [TASK-0010: WebViewExtractor実装とテスト](TASK-0010.md) - 4h (TDD) 🔵
-- [ ] [TASK-0011: UrlContentProcessor実装とテスト](TASK-0011.md) - 4h (TDD) 🔵
-- [ ] [TASK-0012: LoadingScreen UI実装とテスト](TASK-0012.md) - 4h (TDD) 🔵
+- [x] [TASK-0010: WebViewExtractor実装とテスト](TASK-0010.md) - 4h (TDD) 🔵
+- [x] [TASK-0011: UrlContentProcessor実装とテスト](TASK-0011.md) - 4h (TDD) 🔵
+- [x] [TASK-0012: LoadingScreen UI実装とテスト](TASK-0012.md) - 4h (TDD) 🔵
 
 ### 依存関係
 
