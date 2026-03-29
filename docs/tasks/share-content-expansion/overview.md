@@ -73,7 +73,7 @@ TASK-0001 → TASK-0002
 ### タスク一覧
 
 - [x] [TASK-0003: FrontmatterBuilder実装とテスト](TASK-0003.md) - 4h (TDD) 🔵
-- [ ] [TASK-0004: ObsidianUriBuilder実装とテスト](TASK-0004.md) - 4h (TDD) 🔵
+- [x] [TASK-0004: ObsidianUriBuilder実装とテスト](TASK-0004.md) - 4h (TDD) 🔵
 
 ### 依存関係
 
