@@ -1,11 +1,11 @@
 package com.den4dr.share2Obsidian
 
 object AppConfig {
-    // TODO: 実際のVault名に変更（prep.md参照）
-    const val OBSIDIAN_VAULT = ""
+    // TODO: MVP以降で変更可能にする
+    const val OBSIDIAN_VAULT = "testVault"
 
-    // TODO: 実際のフォルダ名に変更（prep.md参照）
-    const val OBSIDIAN_FOLDER = ""
+    // TODO: MVP以降で変更可能にする
+    const val OBSIDIAN_FOLDER = "70_clippings"
 
     val OBSIDIAN_TAGS = listOf("shared")
 

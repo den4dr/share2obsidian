@@ -31,12 +31,12 @@
 
 ## 全体進捗
 
-- [ ] Phase 1: 基盤構築
-- [ ] Phase 2: フォーマット層実装
-- [ ] Phase 3: コンテンツ検出・テキスト処理
-- [ ] Phase 4: HTML・ファイル処理
-- [ ] Phase 5: URL処理・UI実装
-- [ ] Phase 6: 統合・仕上げ
+- [x] Phase 1: 基盤構築
+- [x] Phase 2: フォーマット層実装
+- [x] Phase 3: コンテンツ検出・テキスト処理
+- [x] Phase 4: HTML・ファイル処理
+- [x] Phase 5: URL処理・UI実装
+- [x] Phase 6: 統合・仕上げ
 
 ## マイルストーン
 
@@ -155,7 +155,7 @@ TASK-0002 → TASK-0012
 ### タスク一覧
 
 - [x] [TASK-0013: MainActivity統合リファクタリング](TASK-0013.md) - 4h (TDD) 🔵
-- [ ] [TASK-0014: strings.xmlとエラーハンドリング追加](TASK-0014.md) - 4h (DIRECT) 🔵
+- [x] [TASK-0014: strings.xmlとエラーハンドリング追加](TASK-0014.md) - 4h (DIRECT) 🔵
 
 ### 依存関係
 
