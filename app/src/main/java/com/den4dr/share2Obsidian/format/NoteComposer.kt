@@ -60,8 +60,9 @@ object NoteComposer {
             .appendQueryParameter("folder", config.folder)
         // title が null または空白のときはパラメータ自体を省く。
         // 空文字列 title="" を渡すと Obsidian が "Untitled" に固定してしまうため。
+        // Obsidian URI のファイル名パラメータは "name"（"title" は認識されない）
         if (!title.isNullOrBlank()) {
-            builder.appendQueryParameter("title", title)
+            builder.appendQueryParameter("name", title)
         }
         return builder.build()
     }

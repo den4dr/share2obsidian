@@ -177,7 +177,7 @@ class MainActivityEditFlowTest {
         assertEquals(
             "URI の title クエリが期待値であること",
             "テスト",
-            uri.getQueryParameter("title"),
+            uri.getQueryParameter("name"),
         ) // 【確認内容】: NoteComposer 経由で title が正しく URI 化されること 🔵
         assertEquals(
             "URI の vault クエリが NoteConfig.vault と一致すること",
@@ -200,7 +200,7 @@ class MainActivityEditFlowTest {
         // タイトルはファイル名（URI title パラメータ）として渡し、Frontmatter には含めない
         assertTrue(
             "URI の title クエリにタイトルが設定されること",
-            uri.getQueryParameter("title") == "テスト",
+            uri.getQueryParameter("name") == "テスト",
         )
         assertTrue(
             "URI の content クエリに tags フィールドが含まれること",
@@ -431,7 +431,7 @@ class MainActivityEditFlowTest {
             content.contains("title:"),
         )
         // title=null のとき URI に title パラメータ自体を含めない
-        assertNull(uri.getQueryParameter("title"))
+        assertNull(uri.getQueryParameter("name"))
 
         // Frontmatter の構造が正しいことを確認する（タグ・本文は正しく出力される）
         assertTrue(
@@ -493,7 +493,7 @@ class MainActivityEditFlowTest {
         assertEquals(
             "本文空文字でも URI の title クエリが正しいこと",
             "タイトル",
-            uri.getQueryParameter("title"),
+            uri.getQueryParameter("name"),
         ) // 【確認内容】: 本文が空でも他のクエリパラメータが正しく設定されること 🔵
     }
 
@@ -550,7 +550,7 @@ class MainActivityEditFlowTest {
         // タイトルはフロントマターではなく URI title パラメータで渡す
         assertTrue(
             "タグ空リストでも URI の title クエリにタイトルが設定されること",
-            uri.getQueryParameter("title") == "タイトル",
+            uri.getQueryParameter("name") == "タイトル",
         )
     }
 

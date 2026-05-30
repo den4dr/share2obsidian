@@ -142,7 +142,7 @@ class NoteComposerTest {
         assertEquals("obsidian", uri.scheme) // 【確認内容】: スキームが "obsidian" であること 🔵
         assertEquals("new", uri.host) // 【確認内容】: ホストが "new" であること 🔵
         assertEquals(content, uri.getQueryParameter("content")) // 【確認内容】: content パラメータが正しいこと 🔵
-        assertEquals("タイトル", uri.getQueryParameter("title")) // 【確認内容】: title パラメータが正しいこと 🔵
+        assertEquals("タイトル", uri.getQueryParameter("name")) // 【確認内容】: title パラメータが正しいこと 🔵
         assertEquals("testVault", uri.getQueryParameter("vault")) // 【確認内容】: vault パラメータが正しいこと 🔵
         assertEquals("70_clippings", uri.getQueryParameter("folder")) // 【確認内容】: folder パラメータが正しいこと 🔵
     }
@@ -199,7 +199,7 @@ class NoteComposerTest {
         // 【結果検証】: title パラメータが空文字であることを確認
         // 【期待値確認】: 実装仕様 title ?: "" に基づく。ObsidianUriBuilder の既存動作と同等
         // title=null のとき title パラメータ自体を省く（空文字列を渡すと Obsidian が "Untitled" に固定するため）
-        assertNull(uri.getQueryParameter("title"))
+        assertNull(uri.getQueryParameter("name"))
     }
 
     // ================================================================
