@@ -57,17 +57,12 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: NoteComposer.buildFrontmatter() を呼び出す
         // 【処理内容】: 指定パラメータから Frontmatter 付きノート本文を生成する
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 生成された Frontmatter 文字列の完全一致を確認
-        // 【期待値確認】: REQ-101・TC-101-01 で定義された Frontmatter 形式に準拠
-        assertEquals(
-            "---\ntitle: \"テスト\"\ntags: [shared, web]\n---\n\n本文テスト",
-            result
-        ) // 【確認内容】: Frontmatter 全体の文字列が期待通りであること 🔵
-        assertTrue(result.contains("title: \"テスト\"")) // 【確認内容】: title 行が含まれること 🔵
-        assertTrue(result.contains("tags: [shared, web]")) // 【確認内容】: タグがカンマ+スペース区切りであること 🔵
-        assertTrue(result.endsWith("本文テスト")) // 【確認内容】: 本文が末尾に出力されること 🔵
+        assertEquals("---\ntags: [shared, web]\n---\n\n本文テスト", result)
+        assertTrue(result.contains("tags: [shared, web]"))
+        assertTrue(result.endsWith("本文テスト"))
+        assertTrue(!result.contains("title:"))
     }
 
     /**
@@ -89,15 +84,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: タイトルなしで buildFrontmatter() を呼び出す
         // 【処理内容】: null タイトルを受け取り、title フィールドを省略した Frontmatter を生成
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: title フィールドが省略された Frontmatter を確認
-        // 【期待値確認】: EDGE-001「タイトル空の場合、Frontmatter の title フィールドを省略」に準拠
-        assertEquals(
-            "---\ntags: [shared]\n---\n\n本文",
-            result
-        ) // 【確認内容】: title なしの Frontmatter 全体が期待通りであること 🔵
-        assertTrue(!result.contains("title:")) // 【確認内容】: title: 行が出力に含まれないこと 🔵
+        assertEquals("---\ntags: [shared]\n---\n\n本文", result)
+        assertTrue(!result.contains("title:"))
     }
 
     /**
@@ -119,15 +109,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 3タグで buildFrontmatter() を呼び出す
         // 【処理内容】: タグリストをカンマ+スペース区切りでフォーマットして Frontmatter を生成
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 3タグのカンマ+スペース区切りフォーマットを確認
-        // 【期待値確認】: タグの joinToString(", ") による正確なフォーマット
-        assertEquals(
-            "---\ntitle: \"メモ\"\ntags: [shared, web, clipping]\n---\n\n内容",
-            result
-        ) // 【確認内容】: 3タグが正しいフォーマットで出力されること 🔵
-        assertTrue(result.contains("tags: [shared, web, clipping]")) // 【確認内容】: カンマ+スペース区切りであること 🔵
+        assertEquals("---\ntags: [shared, web, clipping]\n---\n\n内容", result)
+        assertTrue(result.contains("tags: [shared, web, clipping]"))
     }
 
     /**
@@ -239,15 +224,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 空本文で buildFrontmatter() を呼び出す
         // 【処理内容】: 空文字列の本文を受け取り、Frontmatter を生成
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 空本文が正常に処理されることを確認
-        // 【期待値確認】: EDGE-002「本文空の場合、空ノートとして送信」に準拠
-        assertEquals(
-            "---\ntitle: \"タイトル\"\ntags: [shared]\n---\n\n",
-            result
-        ) // 【確認内容】: 空本文の Frontmatter が期待通りであること 🟡
-        assertTrue(result.contains("---\n\n")) // 【確認内容】: Frontmatter 終端の後に空行があること 🟡
+        assertEquals("---\ntags: [shared]\n---\n\n", result)
+        assertTrue(result.contains("---\n\n"))
     }
 
     /**
@@ -269,15 +249,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 最小入力で buildFrontmatter() を呼び出す
         // 【処理内容】: null タイトルと空本文から Frontmatter を生成
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 最小入力でも正常に生成されることを確認
-        // 【期待値確認】: null と空文字の組み合わせでの堅牢性
-        assertEquals(
-            "---\ntags: [shared]\n---\n\n",
-            result
-        ) // 【確認内容】: タイトルなし・本文なしの最小 Frontmatter が期待通りであること 🟡
-        assertTrue(!result.contains("title:")) // 【確認内容】: title: 行が含まれないこと 🟡
+        assertEquals("---\ntags: [shared]\n---\n\n", result)
+        assertTrue(!result.contains("title:"))
     }
 
     /**
@@ -299,14 +274,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 特殊文字を含むタイトルで buildFrontmatter() を呼び出す
         // 【処理内容】: ダブルクォートを含むタイトルを受け取り Frontmatter を生成
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 既存 FrontmatterBuilder と同等の動作を確認
-        // 【期待値確認】: エスケープ処理なし（既存 FrontmatterBuilder と同等の動作）
-        assertEquals(
-            "---\ntitle: \"Hello \"World\"\"\ntags: [shared]\n---\n\nbody",
-            result
-        ) // 【確認内容】: ダブルクォートを含むタイトルが既存動作と同等に処理されること 🔵
+        assertEquals("---\ntags: [shared]\n---\n\nbody", result)
+        assertTrue(!result.contains("title:"))
     }
 
     // ================================================================
@@ -332,15 +303,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 空タグリストで buildFrontmatter() を呼び出す
         // 【処理内容】: 空リストの joinToString が空文字を返すことで tags: [] が生成される
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 空タグリスト時のフォーマットを確認
-        // 【期待値確認】: EDGE-003 仕様「tags フィールド空の場合、tags: [] として生成」に準拠
-        assertEquals(
-            "---\ntags: []\n---\n\n本文",
-            result
-        ) // 【確認内容】: 空タグリストの Frontmatter が tags: [] であること 🔵
-        assertTrue(result.contains("tags: []")) // 【確認内容】: tags: [] が明示的に出力されること 🔵
+        assertEquals("---\ntags: []\n---\n\n本文", result)
+        assertTrue(result.contains("tags: []"))
     }
 
     /**
@@ -362,16 +328,11 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 単一タグで buildFrontmatter() を呼び出す
         // 【処理内容】: 1タグのリストを joinToString(", ") でフォーマット
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 単一タグ時にカンマが出力されないことを確認
-        // 【期待値確認】: タグ数 0, 1, 2+ の全パターンをカバー
-        assertEquals(
-            "---\ntitle: \"メモ\"\ntags: [shared]\n---\n\n内容",
-            result
-        ) // 【確認内容】: 単一タグが正しいフォーマットで出力されること 🔵
-        assertTrue(result.contains("tags: [shared]")) // 【確認内容】: カンマなしの単一タグであること 🔵
-        assertTrue(!result.contains("tags: [shared,]")) // 【確認内容】: 末尾カンマが出力されないこと 🔵
+        assertEquals("---\ntags: [shared]\n---\n\n内容", result)
+        assertTrue(result.contains("tags: [shared]"))
+        assertTrue(!result.contains("tags: [shared,]"))
     }
 
     /**
@@ -420,15 +381,10 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 複数行本文で buildFrontmatter() を呼び出す
         // 【処理内容】: 改行を含む本文をそのまま Frontmatter 後に配置
-        val result = NoteComposer.buildFrontmatter(title, body, tags)
+        val result = NoteComposer.buildFrontmatter(body, tags)
 
-        // 【結果検証】: 複数行本文が正確に保持されることを確認
-        // 【期待値確認】: 改行文字の処理が正確であること
-        assertEquals(
-            "---\ntitle: \"記事\"\ntags: [shared]\n---\n\n第一段落\n\n第二段落\n\n第三段落",
-            result
-        ) // 【確認内容】: 複数行本文を含む Frontmatter 全体が期待通りであること 🟡
-        assertTrue(result.contains("第一段落\n\n第二段落")) // 【確認内容】: 段落間の改行がそのまま保持されること 🟡
+        assertEquals("---\ntags: [shared]\n---\n\n第一段落\n\n第二段落\n\n第三段落", result)
+        assertTrue(result.contains("第一段落\n\n第二段落"))
     }
 
     /**
@@ -481,16 +437,13 @@ class NoteComposerTest {
 
         // 【実際の処理実行】: 両ビルダーに同一入力を与えて出力を比較
         // 【処理内容】: NoteComposer と FrontmatterBuilder を同一入力で呼び出す
-        val noteComposerResult = NoteComposer.buildFrontmatter(title, body, tags)
+        // NoteComposer はタイトルをフロントマターに含めない（ファイル名として URI title パラメータで渡す）
+        val noteComposerResult = NoteComposer.buildFrontmatter(body, tags)
+        assertEquals("---\ntags: [shared]\n---\n\n本文", noteComposerResult)
+        assertTrue(!noteComposerResult.contains("title:"))
+
+        // FrontmatterBuilder（既存、変更なし）はタイトルをフロントマターに含める
         val frontmatterBuilderResult = FrontmatterBuilder.build(title, body)
-
-        // 【結果検証】: 両ビルダーの出力が同一であることを確認
-        // 【期待値確認】: REQ-402「既存ビルダーを変更しない」の後方互換性保証
-        assertEquals(frontmatterBuilderResult, noteComposerResult) // 【確認内容】: NoteComposer と FrontmatterBuilder の出力が一致すること 🟡
-
-        // タイトルなしパターンでも同等の出力を確認
-        val noteComposerResultNoTitle = NoteComposer.buildFrontmatter(null, body, tags)
-        val frontmatterBuilderResultNoTitle = FrontmatterBuilder.build(null, body)
-        assertEquals(frontmatterBuilderResultNoTitle, noteComposerResultNoTitle) // 【確認内容】: タイトルなしの場合も両ビルダーが同一出力であること 🟡
+        assertTrue(frontmatterBuilderResult.contains("title: \"テスト\""))
     }
 }

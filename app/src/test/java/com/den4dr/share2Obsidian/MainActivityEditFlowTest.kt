@@ -156,7 +156,6 @@ class MainActivityEditFlowTest {
         // 【実際の処理実行】: MainActivity の onSend コールバック内と同等のロジックを呼び出す
         // 【処理内容】: buildFrontmatter → buildUri の2ステップで URI を生成する
         val content = NoteComposer.buildFrontmatter(
-            sendParams.title,
             sendParams.body,
             sendParams.tags,
         )
@@ -198,10 +197,11 @@ class MainActivityEditFlowTest {
             "URI の content クエリに Frontmatter ヘッダーが含まれること",
             contentParam?.contains("---") == true,
         ) // 【確認内容】: Frontmatter 区切り文字 --- が含まれていること 🔵
+        // タイトルはファイル名（URI title パラメータ）として渡し、Frontmatter には含めない
         assertTrue(
-            "URI の content クエリに title フィールドが含まれること",
-            contentParam?.contains("title: \"テスト\"") == true,
-        ) // 【確認内容】: タイトルが Frontmatter の title フィールドに設定されていること 🔵
+            "URI の title クエリにタイトルが設定されること",
+            uri.getQueryParameter("title") == "テスト",
+        )
         assertTrue(
             "URI の content クエリに tags フィールドが含まれること",
             contentParam?.contains("tags: [shared, web]") == true,
@@ -354,7 +354,6 @@ class MainActivityEditFlowTest {
             config = defaultConfig,
         )
         val content = NoteComposer.buildFrontmatter(
-            sendParams.title,
             sendParams.body,
             sendParams.tags,
         )
@@ -421,19 +420,16 @@ class MainActivityEditFlowTest {
         // 【実際の処理実行】: MainActivity の onSend と同等のロジックを呼び出す
         // 【処理内容】: NoteComposer.buildFrontmatter(null, body, tags) → buildUri(content, null, config)
         val content = NoteComposer.buildFrontmatter(
-            sendParams.title, // null
             sendParams.body,
             sendParams.tags,
         )
         val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
 
-        // Then: Frontmatter に title 行が含まれないことと、URI の title クエリが空文字であることを確認する
-        // 【結果検証】: null title の安全な処理を検証する
-        // 【期待値確認】: NoteComposer.kt:40 `title?.let { "title: \"$it\"\n" } ?: ""` の動作
+        // Then: Frontmatter に title 行が含まれないこと（タイトルはファイル名として URI title パラメータで渡す）
         assertFalse(
-            "Frontmatter の content に title: フィールドが含まれないこと（title=null の場合は省略）",
+            "Frontmatter に title: フィールドが含まれないこと",
             content.contains("title:"),
-        ) // 【確認内容】: EDGE-001「title=null で title 行省略」が正しく動作すること 🔵
+        )
         assertEquals(
             "URI の title クエリが空文字であること（title=null の場合）",
             "",
@@ -480,16 +476,13 @@ class MainActivityEditFlowTest {
         // When: onSend ロジックを実行する
         // 【実際の処理実行】: NoteComposer で空本文を処理する
         val content = NoteComposer.buildFrontmatter(
-            sendParams.title,
             sendParams.body, // ""
             sendParams.tags,
         )
         val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
 
         // Then: 本文が空でも Frontmatter 構造が保持され、URI が正常に構築されることを確認する
-        // 【結果検証】: 空本文でもクラッシュせず正しい URI が生成されること
-        // 【期待値確認】: NoteComposer.kt:49 `"---\n${titleLine}tags: [$tagsString]\n---\n\n$body"` で body が空文字
-        val expectedContent = "---\ntitle: \"タイトル\"\ntags: [shared]\n---\n\n"
+        val expectedContent = "---\ntags: [shared]\n---\n\n"
         assertEquals(
             "本文空文字の場合の Frontmatter が期待値と一致すること",
             expectedContent,
@@ -533,7 +526,6 @@ class MainActivityEditFlowTest {
         // 【実際の処理実行】: タグ空リストで Frontmatter を構築する
         // 【処理内容】: emptyList<String>().joinToString(", ") == "" → `tags: []` として出力される
         val content = NoteComposer.buildFrontmatter(
-            sendParams.title,
             sendParams.body,
             sendParams.tags, // emptyList()
         )
@@ -558,10 +550,11 @@ class MainActivityEditFlowTest {
             "タグ空リストでも本文が Frontmatter に含まれること",
             content.contains("本文"),
         ) // 【確認内容】: タグが空でも本文は正常に出力されること 🔵
+        // タイトルはフロントマターではなく URI title パラメータで渡す
         assertTrue(
-            "タグ空リストでも title フィールドが Frontmatter に含まれること",
-            content.contains("title: \"タイトル\""),
-        ) // 【確認内容】: タグが空でも title フィールドは正常に出力されること 🔵
+            "タグ空リストでも URI の title クエリにタイトルが設定されること",
+            uri.getQueryParameter("title") == "タイトル",
+        )
     }
 
     /**

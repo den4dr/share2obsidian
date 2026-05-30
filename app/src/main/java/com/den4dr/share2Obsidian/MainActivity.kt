@@ -61,7 +61,6 @@ class MainActivity : ComponentActivity() {
                     config = config,
                     onSend = { sendParams ->
                         val content = NoteComposer.buildFrontmatter(
-                            sendParams.title,
                             sendParams.body,
                             sendParams.tags,
                         )

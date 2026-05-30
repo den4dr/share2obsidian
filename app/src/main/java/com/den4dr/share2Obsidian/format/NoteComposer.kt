@@ -34,19 +34,9 @@ object NoteComposer {
      * @param tags タグリスト（空リスト可）
      * @returns String Frontmatter ヘッダー付きノート本文
      */
-    fun buildFrontmatter(title: String?, body: String, tags: List<String>): String {
-        // 【タイトル行生成】: title が null の場合は空文字列を使用し、title フィールドを省略する 🔵
-        // EDGE-001: タイトルが空の場合、Frontmatter の title フィールドを省略する
-        val titleLine = title?.let { "title: \"$it\"\n" } ?: ""
-
-        // 【タグ文字列生成】: タグリストをカンマ+スペース区切りで結合する 🔵
-        // REQ-103: タグフィールドのカンマ区切りパース仕様
-        // 空リストの場合は空文字列になり、tags: [] として出力される（EDGE-003）
+    fun buildFrontmatter(body: String, tags: List<String>): String {
         val tagsString = tags.joinToString(", ")
-
-        // 【Frontmatter 組み立て】: ---区切りのヘッダーと本文を組み合わせる 🔵
-        // 形式: "---\n[title行]tags: [タグ]\n---\n\n本文"
-        return "---\n${titleLine}tags: [$tagsString]\n---\n\n$body"
+        return "---\ntags: [$tagsString]\n---\n\n$body"
     }
 
     /**
