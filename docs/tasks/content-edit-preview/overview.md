@@ -28,14 +28,14 @@
 
 ## 全体進捗
 
-- [ ] Phase 1: 基盤実装
+- [x] Phase 1: 基盤実装
   - [x] [TASK-0015: NoteConfig + NoteComposer 実装](TASK-0015.md)
-  - [ ] [TASK-0016: EditFormState + parseTagsText + SendParams 実装](TASK-0016.md)
-  - [ ] [TASK-0018: strings.xml UI文字列リソース追加](TASK-0018.md)
-- [ ] Phase 2: UI・統合実装
-  - [ ] [TASK-0017: EditScreenViewModel 実装](TASK-0017.md)
-  - [ ] [TASK-0019: EditScreen Composable 実装](TASK-0019.md)
-  - [ ] [TASK-0020: MainActivity フロー変更](TASK-0020.md)
+  - [x] [TASK-0016: EditFormState + parseTagsText + SendParams 実装](TASK-0016.md)
+  - [x] [TASK-0018: strings.xml UI文字列リソース追加](TASK-0018.md)
+- [x] Phase 2: UI・統合実装
+  - [x] [TASK-0017: EditScreenViewModel 実装](TASK-0017.md)
+  - [x] [TASK-0019: EditScreen Composable 実装](TASK-0019.md)
+  - [x] [TASK-0020: MainActivity フロー変更](TASK-0020.md)
 
 ## マイルストーン
 

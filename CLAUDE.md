@@ -8,14 +8,16 @@ Share2Obsidian is a minimal Android share-target app. It intercepts `ACTION_SEND
 
 ## Build Commands
 
+Java は `.mise.toml` で管理されているため、Gradle コマンドは必ず `mise exec --` 経由で実行すること。
+
 ```bash
-./gradlew assembleDebug          # Build debug APK
-./gradlew assembleRelease        # Build release APK
-./gradlew build                  # Full build (all variants)
-./gradlew clean                  # Clean build outputs
-./gradlew lint                   # Run lint checks
-./gradlew test                   # Run unit tests
-./gradlew connectedAndroidTest   # Run instrumented tests (requires device/emulator)
+mise exec -- ./gradlew assembleDebug          # Build debug APK
+mise exec -- ./gradlew assembleRelease        # Build release APK
+mise exec -- ./gradlew build                  # Full build (all variants)
+mise exec -- ./gradlew clean                  # Clean build outputs
+mise exec -- ./gradlew lint                   # Run lint checks
+mise exec -- ./gradlew test                   # Run unit tests
+mise exec -- ./gradlew connectedAndroidTest   # Run instrumented tests (requires device/emulator)
 ```
 
 ## Architecture

@@ -2,4 +2,14 @@
     <string name="app_name">Share2Obsidian</string>
     <string name="error_obsidian_not_installed">Obsidian がインストールされていません</string>
     <string name="error_no_file_uri">ファイルの取得に失敗しました</string>
+
+    <!-- 編集・プレビュー機能: フィールドラベル -->
+    <string name="label_title">タイトル</string>
+    <string name="label_body">本文</string>
+    <string name="label_tags">タグ（カンマ区切り）</string>
+    <string name="label_folder">フォルダ</string>
+
+    <!-- 編集・プレビュー機能: ボタン -->
+    <string name="button_send">送信</string>
+    <string name="button_cancel">キャンセル</string>
 </resources>
