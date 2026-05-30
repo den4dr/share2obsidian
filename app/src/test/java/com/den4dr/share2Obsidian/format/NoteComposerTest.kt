@@ -3,6 +3,7 @@ package com.den4dr.share2Obsidian.format
 import com.den4dr.share2Obsidian.AppConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -179,7 +180,7 @@ class NoteComposerTest {
      * 🔵 青信号: interfaces.kt `title ?: ""`・ObsidianUriBuilder 既存実装に基づく
      */
     @Test
-    fun `TC-006 title が null の場合に URI の title パラメータが空文字になる`() {
+    fun `TC-006 title が null の場合に URI の title パラメータが省略される`() {
         // 【テスト目的】: title=null 時に title="" として URI に設定されること
         // 【テスト内容】: URI の title クエリパラメータが空文字列として設定される
         // 【期待される動作】: title パラメータが存在し、値が空文字であること
@@ -197,8 +198,8 @@ class NoteComposerTest {
 
         // 【結果検証】: title パラメータが空文字であることを確認
         // 【期待値確認】: 実装仕様 title ?: "" に基づく。ObsidianUriBuilder の既存動作と同等
-        assertNotNull(uri.getQueryParameter("title")) // 【確認内容】: title パラメータが存在すること 🔵
-        assertEquals("", uri.getQueryParameter("title")) // 【確認内容】: title パラメータの値が空文字であること 🔵
+        // title=null のとき title パラメータ自体を省く（空文字列を渡すと Obsidian が "Untitled" に固定するため）
+        assertNull(uri.getQueryParameter("title"))
     }
 
     // ================================================================

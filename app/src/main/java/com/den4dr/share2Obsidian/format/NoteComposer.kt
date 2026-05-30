@@ -54,17 +54,15 @@ object NoteComposer {
      * @returns Uri Obsidian URI（scheme="obsidian", host="new"）
      */
     fun buildUri(content: String, title: String?, config: NoteConfig): Uri {
-        // 【URI 構築開始】: obsidian://new をベースに URI を構築する 🔵
-        // REQ-101: 送信ボタンタップ時に編集後の値から URI を構築し Obsidian を起動する
-        return Uri.parse("obsidian://new").buildUpon()
-            // 【content パラメータ】: Frontmatter 付きノート本文を URL エンコードして設定 🔵
+        val builder = Uri.parse("obsidian://new").buildUpon()
             .appendQueryParameter("content", content)
-            // 【title パラメータ】: title が null の場合は空文字列を設定（TC-006） 🔵
-            .appendQueryParameter("title", title ?: "")
-            // 【vault パラメータ】: NoteConfig の vault 値を設定（AppConfig 非依存） 🔵
             .appendQueryParameter("vault", config.vault)
-            // 【folder パラメータ】: NoteConfig の folder 値を設定（スラッシュ含む場合も appendQueryParameter が適切にエンコード） 🔵
             .appendQueryParameter("folder", config.folder)
-            .build()
+        // title が null または空白のときはパラメータ自体を省く。
+        // 空文字列 title="" を渡すと Obsidian が "Untitled" に固定してしまうため。
+        if (!title.isNullOrBlank()) {
+            builder.appendQueryParameter("title", title)
+        }
+        return builder.build()
     }
 }

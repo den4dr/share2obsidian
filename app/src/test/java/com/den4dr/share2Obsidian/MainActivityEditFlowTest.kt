@@ -430,11 +430,8 @@ class MainActivityEditFlowTest {
             "Frontmatter に title: フィールドが含まれないこと",
             content.contains("title:"),
         )
-        assertEquals(
-            "URI の title クエリが空文字であること（title=null の場合）",
-            "",
-            uri.getQueryParameter("title"),
-        ) // 【確認内容】: NoteComposer.buildUri の `title ?: ""` の動作 🔵
+        // title=null のとき URI に title パラメータ自体を含めない
+        assertNull(uri.getQueryParameter("title"))
 
         // Frontmatter の構造が正しいことを確認する（タグ・本文は正しく出力される）
         assertTrue(
