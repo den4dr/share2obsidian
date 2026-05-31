@@ -7,6 +7,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.den4dr.share2Obsidian.content.ContentTypeDetector
 import com.den4dr.share2Obsidian.content.FileContentProcessor
@@ -19,6 +23,7 @@ import com.den4dr.share2Obsidian.format.NoteConfig
 import com.den4dr.share2Obsidian.ui.EditScreen
 import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.LoadingScreen
+import com.den4dr.share2Obsidian.ui.SettingsScreen
 import com.den4dr.share2Obsidian.util.WebViewExtractor
 import kotlinx.coroutines.launch
 
@@ -32,7 +37,15 @@ class MainActivity : ComponentActivity() {
 
         val shareContent = ContentTypeDetector.detect(intent)
         if (shareContent == null) {
-            finish()
+            if (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) {
+                // 未対応・不正な共有インテント → 即終了
+                finish()
+            } else {
+                // 直接起動（アイコンタップ）→ 設定画面を表示（REQ-001）
+                setContent {
+                    SettingsScreen(onNavigateBack = { finish() })
+                }
+            }
             return
         }
 
@@ -56,30 +69,38 @@ class MainActivity : ComponentActivity() {
             viewModel.initialize(processed, config)
 
             setContent {
-                EditScreen(
-                    viewModel = viewModel,
-                    config = config,
-                    onSend = { sendParams ->
-                        val content = NoteComposer.buildFrontmatter(
-                            sendParams.body,
-                            sendParams.tags,
-                        )
-                        val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
-                        try {
-                            startActivity(Intent(Intent.ACTION_VIEW, uri))
-                        } catch (e: ActivityNotFoundException) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                getString(R.string.error_obsidian_not_installed),
-                                Toast.LENGTH_LONG,
-                            ).show()
-                        }
-                        finish()
-                    },
-                    onCancel = {
-                        finish()
-                    },
-                )
+                // rememberSaveable で画面回転後も状態を復元する（EDGE-101）
+                var showSettings by rememberSaveable { mutableStateOf(false) }
+
+                if (showSettings) {
+                    SettingsScreen(onNavigateBack = { showSettings = false })
+                } else {
+                    EditScreen(
+                        viewModel = viewModel,
+                        config = config,
+                        onSend = { sendParams ->
+                            val content = NoteComposer.buildFrontmatter(
+                                sendParams.body,
+                                sendParams.tags,
+                            )
+                            val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
+                            try {
+                                startActivity(Intent(Intent.ACTION_VIEW, uri))
+                            } catch (e: ActivityNotFoundException) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    getString(R.string.error_obsidian_not_installed),
+                                    Toast.LENGTH_LONG,
+                                ).show()
+                            }
+                            finish()
+                        },
+                        onCancel = {
+                            finish()
+                        },
+                        onNavigateToSettings = { showSettings = true },
+                    )
+                }
             }
         }
     }

@@ -9,11 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,13 +39,16 @@ import com.den4dr.share2Obsidian.format.NoteConfig
  * @param config 送信先 vault・folder・defaultTags を含む設定
  * @param onSend 送信ボタン押下時に [SendParams] を渡して呼ばれるコールバック
  * @param onCancel キャンセルボタン・バックボタン押下時に呼ばれるコールバック
+ * @param onNavigateToSettings 設定アイコンタップ時に呼ばれるコールバック
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreen(
     viewModel: EditScreenViewModel,
     config: NoteConfig,
     onSend: (SendParams) -> Unit,
     onCancel: () -> Unit,
+    onNavigateToSettings: () -> Unit,
 ) {
     val formState by viewModel.formState.collectAsState()
 
@@ -47,6 +56,19 @@ fun EditScreen(
     BackHandler { onCancel() }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.label_settings),
+                        )
+                    }
+                },
+            )
+        },
         bottomBar = {
             Row(
                 modifier = Modifier

@@ -12,4 +12,8 @@
     <!-- 編集・プレビュー機能: ボタン -->
     <string name="button_send">送信</string>
     <string name="button_cancel">キャンセル</string>
+
+    <!-- 設定画面 -->
+    <string name="label_settings">設定</string>
+    <string name="settings_placeholder">設定項目はまだ実装されていません</string>
 </resources>
