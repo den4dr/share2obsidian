@@ -2,6 +2,8 @@ package com.den4dr.share2Obsidian.ui
 
 import com.den4dr.share2Obsidian.content.ContentKind
 import com.den4dr.share2Obsidian.content.ProcessedContent
+import com.den4dr.share2Obsidian.domain.model.CustomFieldState
+import com.den4dr.share2Obsidian.domain.model.FieldValueType
 import com.den4dr.share2Obsidian.format.NoteConfig
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -666,5 +668,28 @@ class EditScreenViewModelTest {
             "new_folder",
             viewModel.formState.value.folder
         ) // 【確認内容】: 最後の updateFolder が反映されていること 🟡
+    }
+
+    // TC-CUSTOM-001: initialize() で customFields が FormState に設定される
+    @Test
+    fun `TC-CUSTOM-001 initialize で customFields が formState に設定される`() {
+        val viewModel = EditScreenViewModel()
+        val customFields = listOf(
+            CustomFieldState("source", "https://example.com", FieldValueType.STRING)
+        )
+        viewModel.initialize(standardProcessed, standardConfig, customFields)
+        assertEquals(customFields, viewModel.formState.value.customFields)
+    }
+
+    // TC-CUSTOM-002: buildSendParams() が customFields を含む SendParams を返す
+    @Test
+    fun `TC-CUSTOM-002 buildSendParams が customFields を含む SendParams を返す`() {
+        val viewModel = EditScreenViewModel()
+        val customFields = listOf(
+            CustomFieldState("source", "https://example.com", FieldValueType.STRING)
+        )
+        viewModel.initialize(standardProcessed, standardConfig, customFields)
+        val params = viewModel.buildSendParams(standardConfig)
+        assertEquals(customFields, params.customFields)
     }
 }

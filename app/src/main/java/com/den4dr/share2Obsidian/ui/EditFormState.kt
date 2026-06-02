@@ -30,6 +30,8 @@ data class EditFormState(
     val tagsText: String,
     // 【フィールド定義】: フォルダフィールドの現在値。config.folder 由来（REQ-405）🔵
     val folder: String,
+    // 【フィールド定義】: テンプレートから適用されたカスタムフィールド一覧（REQ-052）🔵
+    val customFields: List<com.den4dr.share2Obsidian.domain.model.CustomFieldState> = emptyList(),
 )
 
 /**

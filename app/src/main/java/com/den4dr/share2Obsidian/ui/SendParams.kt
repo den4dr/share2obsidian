@@ -25,4 +25,6 @@ data class SendParams(
     val tags: List<String>,
     // 【フィールド定義】: 送信設定（vault/folder/defaultTags）。NoteComposer への依存渡し用（REQ-405）🔵
     val config: NoteConfig,
+    // 【フィールド定義】: テンプレートから適用されたカスタムフィールド一覧（REQ-052）🔵
+    val customFields: List<com.den4dr.share2Obsidian.domain.model.CustomFieldState> = emptyList(),
 )

@@ -2,6 +2,7 @@ package com.den4dr.share2Obsidian.ui
 
 import androidx.lifecycle.ViewModel
 import com.den4dr.share2Obsidian.content.ProcessedContent
+import com.den4dr.share2Obsidian.domain.model.CustomFieldState
 import com.den4dr.share2Obsidian.format.NoteConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +55,11 @@ class EditScreenViewModel : ViewModel() {
      * @param processed コンテンツ処理結果。`title` は nullable（共有元アプリがタイトルを提供しない場合は null）
      * @param config アプリ設定。`vault`・`folder`・`defaultTags` を含む（TASK-0015: NoteConfig）
      */
-    fun initialize(processed: ProcessedContent, config: NoteConfig) {
+    fun initialize(
+        processed: ProcessedContent,
+        config: NoteConfig,
+        customFields: List<CustomFieldState> = emptyList(),
+    ) {
         // 【重複実行防止】: 画面回転時に initialize() が再度呼ばれても無視する（EDGE-101）🔵
         if (initialized) return
 
@@ -71,7 +76,17 @@ class EditScreenViewModel : ViewModel() {
             tagsText = config.defaultTags.joinToString(", "),
             // 【フォルダ初期値】: NoteConfig.folder をそのまま使用する（REQ-405）🔵
             folder = config.folder,
+            // 【カスタムフィールド初期値】: テンプレートから適用されたカスタムフィールド（REQ-052）🔵
+            customFields = customFields,
         )
+    }
+
+    fun updateCustomField(index: Int, value: String) {
+        val fields = _formState.value.customFields.toMutableList()
+        if (index in fields.indices) {
+            fields[index] = fields[index].copy(value = value)
+            _formState.value = _formState.value.copy(customFields = fields)
+        }
     }
 
     /**
@@ -149,15 +164,15 @@ class EditScreenViewModel : ViewModel() {
 
         return SendParams(
             // 【タイトル変換】: 空文字列またはスペースのみのタイトルを null に変換する（EDGE-001）🔵
-            // 【ifBlank の利用】: String.ifBlank {} は空文字列・スペースのみの文字列の両方を null に変換する
             title = state.title.ifBlank { null },
             // 【本文設定】: 本文はそのまま渡す（空文字列も許容、EDGE-002）🔵
             body = state.body,
             // 【タグパース】: カンマ区切りのタグ文字列を List<String> に変換する（REQ-103）🔵
-            // 【parseTagsText 利用】: TASK-0016 で実装済みの関数を再利用する
             tags = parseTagsText(state.tagsText),
             // 【設定渡し】: メソッド引数の NoteConfig をそのまま SendParams に設定する（REQ-405）🔵
             config = config,
+            // 【カスタムフィールド渡し】: フォーム状態のカスタムフィールドを SendParams に渡す（REQ-052）🔵
+            customFields = state.customFields,
         )
     }
 }
