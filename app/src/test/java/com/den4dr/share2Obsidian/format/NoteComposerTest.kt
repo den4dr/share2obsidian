@@ -1,7 +1,10 @@
 package com.den4dr.share2Obsidian.format
 
 import com.den4dr.share2Obsidian.AppConfig
+import com.den4dr.share2Obsidian.domain.model.CustomFieldState
+import com.den4dr.share2Obsidian.domain.model.FieldValueType
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -446,5 +449,54 @@ class NoteComposerTest {
         // FrontmatterBuilder（既存、変更なし）はタイトルをフロントマターに含める
         val frontmatterBuilderResult = FrontmatterBuilder.build(title, body)
         assertTrue(frontmatterBuilderResult.contains("title: \"テスト\""))
+    }
+
+    // ================================================================
+    // カスタムフィールド対応テスト (TASK-0038)
+    // ================================================================
+
+    @Test
+    fun `TC-CUSTOM-001 カスタムフィールドが frontmatter に追加される`() {
+        val customFields = listOf(
+            CustomFieldState("source", "https://example.com", FieldValueType.STRING)
+        )
+        val result = NoteComposer.buildFrontmatter("body", listOf("shared"), customFields)
+        assertTrue(result.contains("source: https://example.com"))
+    }
+
+    @Test
+    fun `TC-CUSTOM-002 カスタムフィールドが標準 tags より前に出力される`() {
+        val customFields = listOf(
+            CustomFieldState("source", "https://example.com", FieldValueType.STRING)
+        )
+        val result = NoteComposer.buildFrontmatter("body", listOf("shared"), customFields)
+        val sourceIdx = result.indexOf("source:")
+        val tagsIdx = result.indexOf("tags:")
+        assertTrue(sourceIdx < tagsIdx)
+    }
+
+    @Test
+    fun `TC-CUSTOM-003 key=tags のカスタムフィールドが標準 tags を上書き`() {
+        val customFields = listOf(
+            CustomFieldState("tags", "custom-tag", FieldValueType.LIST)
+        )
+        val result = NoteComposer.buildFrontmatter("body", listOf("shared"), customFields)
+        assertTrue(result.contains("tags: [custom-tag]"))
+        assertFalse(result.contains("tags: [shared]"))
+    }
+
+    @Test
+    fun `TC-CUSTOM-004 LIST 型フィールドが bracket 形式で出力される`() {
+        val customFields = listOf(
+            CustomFieldState("categories", "tech, android", FieldValueType.LIST)
+        )
+        val result = NoteComposer.buildFrontmatter("body", listOf("shared"), customFields)
+        assertTrue(result.contains("categories: [tech, android]"))
+    }
+
+    @Test
+    fun `TC-CUSTOM-005 customFields が空の場合は既存動作と同じ`() {
+        val result = NoteComposer.buildFrontmatter("body", listOf("shared"))
+        assertEquals("---\ntags: [shared]\n---\n\nbody", result)
     }
 }
