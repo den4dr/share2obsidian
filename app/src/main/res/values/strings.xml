@@ -58,4 +58,7 @@
     <string name="html_meta_modified_date">更新日</string>
     <string name="html_meta_author">著者</string>
     <string name="field_add_button">追加</string>
+
+    <!-- EditScreen カスタムフィールドセクション -->
+    <string name="custom_fields_section_header">カスタムフィールド</string>
 </resources>

@@ -7,8 +7,13 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.performTextInput
 import com.den4dr.share2Obsidian.content.ContentKind
 import com.den4dr.share2Obsidian.content.ProcessedContent
+import com.den4dr.share2Obsidian.domain.model.CustomFieldState
+import com.den4dr.share2Obsidian.domain.model.FieldValueType
 import com.den4dr.share2Obsidian.format.NoteConfig
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -555,5 +560,62 @@ class EditScreenTest {
         // 【結果検証】: ボタンが bottomBar に固定され、スクロール対象外であることを確認する
         composeTestRule.onNodeWithText("送信").assertIsDisplayed()     // 【確認内容】: 送信ボタンが常に表示される（NFR-102）🟡
         composeTestRule.onNodeWithText("キャンセル").assertIsDisplayed() // 【確認内容】: キャンセルボタンが常に表示される（NFR-102）🟡
+    }
+
+    // TC-CUSTOM-UI-001: customFields が空の場合、カスタムフィールドセクションが非表示
+    @Test
+    fun `TC-CUSTOM-UI-001 customFields が空のとき セクションが非表示`() {
+        val viewModel = createViewModel()
+        composeTestRule.setContent {
+            EditScreen(
+                viewModel = viewModel,
+                config = testConfig,
+                onSend = {},
+                onCancel = {},
+                onNavigateToSettings = {},
+            )
+        }
+        composeTestRule.onAllNodesWithText("カスタムフィールド").assertCountEquals(0)
+    }
+
+    // TC-CUSTOM-UI-002: customFields があるとき、キーと値が表示される
+    @Test
+    fun `TC-CUSTOM-UI-002 customFields があるとき キーと値が表示される`() {
+        val viewModel = EditScreenViewModel()
+        val processed = ProcessedContent(body = "本文", contentType = ContentKind.TEXT)
+        val customFields = listOf(CustomFieldState("source", "https://example.com", FieldValueType.STRING))
+        viewModel.initialize(processed, testConfig, customFields)
+        composeTestRule.setContent {
+            EditScreen(
+                viewModel = viewModel,
+                config = testConfig,
+                onSend = {},
+                onCancel = {},
+                onNavigateToSettings = {},
+            )
+        }
+        composeTestRule.onNodeWithText("カスタムフィールド").assertIsDisplayed()
+        composeTestRule.onNodeWithText("source").assertIsDisplayed()
+        composeTestRule.onNodeWithText("https://example.com").assertIsDisplayed()
+    }
+
+    // TC-CUSTOM-UI-003: カスタムフィールドの値を編集すると ViewModel に反映される
+    @Test
+    fun `TC-CUSTOM-UI-003 カスタムフィールドの値編集が ViewModel に反映される`() {
+        val viewModel = EditScreenViewModel()
+        val processed = ProcessedContent(body = "本文", contentType = ContentKind.TEXT)
+        val customFields = listOf(CustomFieldState("source", "", FieldValueType.STRING))
+        viewModel.initialize(processed, testConfig, customFields)
+        composeTestRule.setContent {
+            EditScreen(
+                viewModel = viewModel,
+                config = testConfig,
+                onSend = {},
+                onCancel = {},
+                onNavigateToSettings = {},
+            )
+        }
+        composeTestRule.onNodeWithText("source").performTextInput("new-value")
+        assertEquals("new-value", viewModel.formState.value.customFields[0].value)
     }
 }

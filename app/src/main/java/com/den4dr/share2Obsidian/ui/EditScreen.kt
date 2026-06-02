@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.den4dr.share2Obsidian.R
 import com.den4dr.share2Obsidian.format.NoteConfig
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 
 /**
  * Obsidian への送信前にコンテンツ（タイトル・本文・タグ・フォルダ）を確認・編集するフォーム画面。
@@ -127,6 +129,22 @@ fun EditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 5,
             )
+            if (formState.customFields.isNotEmpty()) {
+                HorizontalDivider()
+                Text(
+                    text = stringResource(R.string.custom_fields_section_header),
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                formState.customFields.forEachIndexed { index, field ->
+                    OutlinedTextField(
+                        value = field.value,
+                        onValueChange = { viewModel.updateCustomField(index, it) },
+                        label = { Text(field.key) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                }
+            }
         }
     }
 }

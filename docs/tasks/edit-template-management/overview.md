@@ -133,7 +133,7 @@ TASK-0035 → TASK-0037
 
 - [x] [TASK-0038: NoteComposer.buildFrontmatter カスタムフィールド対応](TASK-0038.md) - 6h (TDD) 🔵
 - [x] [TASK-0039: EditFormState・SendParams・EditScreenViewModel カスタムフィールド拡張](TASK-0039.md) - 6h (TDD) 🔵
-- [ ] [TASK-0040: EditScreen カスタムフィールドセクション UI 実装](TASK-0040.md) - 8h (TDD) 🔵
+- [x] [TASK-0040: EditScreen カスタムフィールドセクション UI 実装](TASK-0040.md) - 8h (TDD) 🔵
 - [ ] [TASK-0041: MainActivity テンプレート適用ロジック実装](TASK-0041.md) - 8h (TDD) 🔵
 
 ### 依存関係
