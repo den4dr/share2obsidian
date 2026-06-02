@@ -56,7 +56,7 @@
 ### タスク一覧
 
 - [x] [TASK-0025: Hilt・KSP・Room 依存関係追加とプロジェクト設定](TASK-0025.md) - 4h (DIRECT) 🔵
-- [ ] [TASK-0026: ドメインモデル実装](TASK-0026.md) - 6h (TDD) 🔵
+- [x] [TASK-0026: ドメインモデル実装](TASK-0026.md) - 6h (TDD) 🔵
 - [ ] [TASK-0027: Room DB エンティティ・DAO・AppDatabase 実装](TASK-0027.md) - 8h (TDD) 🔵
 - [ ] [TASK-0028: TemplateRepository・Hilt DI・Application クラス実装](TASK-0028.md) - 8h (TDD) 🔵
 
