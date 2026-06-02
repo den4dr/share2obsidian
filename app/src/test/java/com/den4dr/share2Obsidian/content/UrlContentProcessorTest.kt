@@ -1,9 +1,11 @@
 package com.den4dr.share2Obsidian.content
 
+import com.den4dr.share2Obsidian.domain.model.HtmlMetaKey
 import com.den4dr.share2Obsidian.util.WebViewExtractionResult
 import com.den4dr.share2Obsidian.util.WebViewExtractor
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -52,5 +54,49 @@ class UrlContentProcessorTest {
         val processor = UrlContentProcessor(extractor)
         val result = processor.process(ShareContent.Url(url = "https://example.com"))
         assertEquals(ContentKind.URL, result.contentType)
+    }
+
+    // TC-TASK0036-1: metadata が HtmlMetaKey で正しくマッピングされる
+    @Test
+    fun `metadata is mapped from WebViewExtractionResult`() = runBlocking {
+        val extractor = fakeExtractor(
+            WebViewExtractionResult(
+                bodyText = "本文",
+                ogTitle = "テスト記事",
+                author = "著者名",
+            )
+        )
+        val processor = UrlContentProcessor(extractor)
+        val result = processor.process(ShareContent.Url(url = "https://example.com"))
+        assertEquals("テスト記事", result.metadata[HtmlMetaKey.OG_TITLE])
+        assertEquals("著者名", result.metadata[HtmlMetaKey.AUTHOR])
+        assertEquals("https://example.com", result.metadata[HtmlMetaKey.URL])
+    }
+
+    // TC-TASK0036-2: sourceUrl が ProcessedContent.sourceUrl に設定される
+    @Test
+    fun `sourceUrl is set from url`() = runBlocking {
+        val extractor = fakeExtractor(WebViewExtractionResult(bodyText = "本文"))
+        val processor = UrlContentProcessor(extractor)
+        val result = processor.process(ShareContent.Url(url = "https://example.com"))
+        assertEquals("https://example.com", result.sourceUrl)
+    }
+
+    // TC-TASK0036-3: 空のメタデータフィールドはマップに含まれない
+    @Test
+    fun `empty metadata fields are excluded`() = runBlocking {
+        val extractor = fakeExtractor(
+            WebViewExtractionResult(
+                bodyText = "本文",
+                ogTitle = "",
+                ogDescription = "",
+            )
+        )
+        val processor = UrlContentProcessor(extractor)
+        val result = processor.process(ShareContent.Url(url = "https://example.com"))
+        assertNull(result.metadata[HtmlMetaKey.OG_TITLE])
+        assertNull(result.metadata[HtmlMetaKey.OG_DESCRIPTION])
+        // URL は常に含まれる
+        assertEquals("https://example.com", result.metadata[HtmlMetaKey.URL])
     }
 }
