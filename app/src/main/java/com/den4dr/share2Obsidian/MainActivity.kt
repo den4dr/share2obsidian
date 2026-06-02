@@ -24,14 +24,19 @@ import com.den4dr.share2Obsidian.ui.EditScreen
 import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.LoadingScreen
 import com.den4dr.share2Obsidian.ui.SettingsScreen
+import com.den4dr.share2Obsidian.data.repository.TemplateRepository
 import com.den4dr.share2Obsidian.ui.template.TemplateEditScreen
 import com.den4dr.share2Obsidian.ui.template.TemplateListScreen
 import com.den4dr.share2Obsidian.util.WebViewExtractor
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var templateRepository: TemplateRepository
 
     // 画面回転時も ViewModel インスタンスを保持するため viewModels() デリゲートを使用する（EDGE-101）
     private val viewModel: EditScreenViewModel by viewModels()
@@ -77,8 +82,6 @@ class MainActivity : ComponentActivity() {
             setContent { LoadingScreen() }
         }
 
-        val config = NoteConfig.fromAppConfig()
-
         lifecycleScope.launch {
             val processed = when (shareContent) {
                 is ShareContent.Text -> TextContentProcessor().process(shareContent)
@@ -89,7 +92,10 @@ class MainActivity : ComponentActivity() {
                 is ShareContent.File -> FileContentProcessor(this@MainActivity).process(shareContent)
             }
 
-            viewModel.initialize(processed, config)
+            val defaultTemplate = templateRepository.getDefaultTemplate()
+            val config = TemplateApplicator.buildConfig(defaultTemplate)
+            val customFields = TemplateApplicator.buildCustomFields(defaultTemplate, processed)
+            viewModel.initialize(processed, config, customFields)
 
             setContent {
                 // rememberSaveable で画面回転後も状態を復元する（EDGE-101）
