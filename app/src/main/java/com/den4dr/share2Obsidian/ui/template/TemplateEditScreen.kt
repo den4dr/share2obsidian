@@ -61,6 +61,10 @@ fun TemplateEditScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showFieldDialog by remember { mutableStateOf(false) }
 
+    LaunchedEffect(templateId) {
+        if (templateId != null) viewModel.loadTemplateById(templateId)
+    }
+
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) onNavigateBack()
     }

@@ -86,6 +86,11 @@ class TemplateEditViewModel @Inject constructor(
         }
     }
 
+    fun loadTemplateById(id: Long) {
+        _uiState.value = TemplateEditUiState(templateId = id)
+        loadTemplate(id)
+    }
+
     fun updateName(name: String) = _uiState.update { it.copy(name = name) }
     fun updateVault(vault: String) = _uiState.update { it.copy(vault = vault) }
     fun updateFolder(folder: String) = _uiState.update { it.copy(folder = folder) }

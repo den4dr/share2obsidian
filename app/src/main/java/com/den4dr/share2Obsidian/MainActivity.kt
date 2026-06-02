@@ -24,6 +24,8 @@ import com.den4dr.share2Obsidian.ui.EditScreen
 import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.LoadingScreen
 import com.den4dr.share2Obsidian.ui.SettingsScreen
+import com.den4dr.share2Obsidian.ui.template.TemplateEditScreen
+import com.den4dr.share2Obsidian.ui.template.TemplateListScreen
 import com.den4dr.share2Obsidian.util.WebViewExtractor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -45,7 +47,26 @@ class MainActivity : ComponentActivity() {
             } else {
                 // 直接起動（アイコンタップ）→ 設定画面を表示（REQ-001）
                 setContent {
-                    SettingsScreen(onNavigateBack = { finish() })
+                    var showTemplateList by rememberSaveable { mutableStateOf(false) }
+                    var editingTemplateId by rememberSaveable { mutableStateOf<Long?>(null) }
+
+                    when {
+                        editingTemplateId != null ->
+                            TemplateEditScreen(
+                                templateId = editingTemplateId,
+                                onNavigateBack = { editingTemplateId = null },
+                            )
+                        showTemplateList ->
+                            TemplateListScreen(
+                                onNavigateBack = { showTemplateList = false },
+                                onNavigateToEdit = { id -> editingTemplateId = id },
+                            )
+                        else ->
+                            SettingsScreen(
+                                onNavigateBack = { finish() },
+                                onNavigateToTemplates = { showTemplateList = true },
+                            )
+                    }
                 }
             }
             return
@@ -73,35 +94,49 @@ class MainActivity : ComponentActivity() {
             setContent {
                 // rememberSaveable で画面回転後も状態を復元する（EDGE-101）
                 var showSettings by rememberSaveable { mutableStateOf(false) }
+                var showTemplateList by rememberSaveable { mutableStateOf(false) }
+                var editingTemplateId by rememberSaveable { mutableStateOf<Long?>(null) }
 
-                if (showSettings) {
-                    SettingsScreen(onNavigateBack = { showSettings = false })
-                } else {
-                    EditScreen(
-                        viewModel = viewModel,
-                        config = config,
-                        onSend = { sendParams ->
-                            val content = NoteComposer.buildFrontmatter(
-                                sendParams.body,
-                                sendParams.tags,
-                            )
-                            val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
-                            try {
-                                startActivity(Intent(Intent.ACTION_VIEW, uri))
-                            } catch (e: ActivityNotFoundException) {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    getString(R.string.error_obsidian_not_installed),
-                                    Toast.LENGTH_LONG,
-                                ).show()
-                            }
-                            finish()
-                        },
-                        onCancel = {
-                            finish()
-                        },
-                        onNavigateToSettings = { showSettings = true },
-                    )
+                when {
+                    editingTemplateId != null ->
+                        TemplateEditScreen(
+                            templateId = editingTemplateId,
+                            onNavigateBack = { editingTemplateId = null },
+                        )
+                    showTemplateList ->
+                        TemplateListScreen(
+                            onNavigateBack = { showTemplateList = false },
+                            onNavigateToEdit = { id -> editingTemplateId = id },
+                        )
+                    showSettings ->
+                        SettingsScreen(
+                            onNavigateBack = { showSettings = false },
+                            onNavigateToTemplates = { showTemplateList = true },
+                        )
+                    else ->
+                        EditScreen(
+                            viewModel = viewModel,
+                            config = config,
+                            onSend = { sendParams ->
+                                val content = NoteComposer.buildFrontmatter(
+                                    sendParams.body,
+                                    sendParams.tags,
+                                )
+                                val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
+                                try {
+                                    startActivity(Intent(Intent.ACTION_VIEW, uri))
+                                } catch (e: ActivityNotFoundException) {
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        getString(R.string.error_obsidian_not_installed),
+                                        Toast.LENGTH_LONG,
+                                    ).show()
+                                }
+                                finish()
+                            },
+                            onCancel = { finish() },
+                            onNavigateToSettings = { showSettings = true },
+                        )
                 }
             }
         }

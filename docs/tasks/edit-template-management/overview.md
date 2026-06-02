@@ -85,7 +85,7 @@ TASK-0027 → TASK-0028
 - [x] [TASK-0031: TemplateEditViewModel 実装](TASK-0031.md) - 8h (TDD) 🔵
 - [x] [TASK-0032: TemplateEditScreen 基本情報 UI 実装](TASK-0032.md) - 8h (TDD) 🔵
 - [x] [TASK-0033: TemplateEditScreen フィールド管理 UI 実装](TASK-0033.md) - 8h (TDD) 🔵
-- [ ] [TASK-0034: SettingsScreen・MainActivity ナビゲーション統合](TASK-0034.md) - 6h (TDD) 🔵
+- [x] [TASK-0034: SettingsScreen・MainActivity ナビゲーション統合](TASK-0034.md) - 6h (TDD) 🔵
 
 ### 依存関係
 
