@@ -427,6 +427,7 @@ class EditScreenTest {
                 config = testConfig,
                 onSend = { params -> captured.add(params) },
                 onCancel = {},
+                onNavigateToSettings = {},
             )
         }
 
@@ -463,6 +464,7 @@ class EditScreenTest {
                 config = testConfig,
                 onSend = { sendCount++ },
                 onCancel = { cancelCount++ },
+                onNavigateToSettings = {},
             )
         }
 
@@ -503,6 +505,7 @@ class EditScreenTest {
                 config = testConfig,
                 onSend = { sendCount++ },
                 onCancel = { cancelCount++ },
+                onNavigateToSettings = {},
             )
         }
 
@@ -544,6 +547,7 @@ class EditScreenTest {
                 config = testConfig,
                 onSend = {},
                 onCancel = {},
+                onNavigateToSettings = {},
             )
         }
 

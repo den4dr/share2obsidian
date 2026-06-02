@@ -48,7 +48,7 @@ fun EditScreen(
     config: NoteConfig,
     onSend: (SendParams) -> Unit,
     onCancel: () -> Unit,
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
 ) {
     val formState by viewModel.formState.collectAsState()
 

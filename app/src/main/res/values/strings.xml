@@ -16,4 +16,15 @@
     <!-- 設定画面 -->
     <string name="label_settings">設定</string>
     <string name="settings_placeholder">設定項目はまだ実装されていません</string>
+
+    <!-- テンプレート管理画面 -->
+    <string name="template_list_title">テンプレート管理</string>
+    <string name="template_add_button">テンプレートを追加</string>
+    <string name="template_delete_button">削除</string>
+    <string name="template_edit_button">編集</string>
+    <string name="template_default_badge">デフォルト</string>
+    <string name="template_list_empty">テンプレートがありません</string>
+    <string name="template_delete_confirm_title">テンプレートを削除</string>
+    <string name="template_delete_confirm_message">「%1$s」を削除しますか？</string>
+    <string name="template_delete_confirm_button">削除する</string>
 </resources>
