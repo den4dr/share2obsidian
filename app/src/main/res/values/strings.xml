@@ -36,4 +36,26 @@
     <string name="template_folder_label">フォルダ</string>
     <string name="template_default_label">デフォルトテンプレートに設定</string>
     <string name="template_save_button">保存</string>
+
+    <!-- フィールド管理 -->
+    <string name="template_fields_header">カスタムフィールド</string>
+    <string name="template_add_field_button">フィールドを追加</string>
+    <string name="field_key_label">フィールドキー名</string>
+    <string name="field_default_value_label">デフォルト値</string>
+    <string name="field_value_source_label">値ソース</string>
+    <string name="field_value_type_label">値タイプ</string>
+    <string name="field_source_fixed">固定値</string>
+    <string name="field_source_html_meta">HTMLメタ</string>
+    <string name="field_source_url">URL</string>
+    <string name="field_source_empty">なし</string>
+    <string name="field_type_string">文字列</string>
+    <string name="field_type_list">リスト</string>
+    <string name="field_html_meta_key_label">HTMLメタキー</string>
+    <string name="html_meta_og_title">OGタイトル</string>
+    <string name="html_meta_og_description">OG説明</string>
+    <string name="html_meta_url">URL</string>
+    <string name="html_meta_published_date">公開日</string>
+    <string name="html_meta_modified_date">更新日</string>
+    <string name="html_meta_author">著者</string>
+    <string name="field_add_button">追加</string>
 </resources>

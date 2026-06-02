@@ -73,6 +73,38 @@ class TemplateEditScreenTest {
         }
         composeTestRule.onNodeWithText("テンプレート作成").assertIsDisplayed()
     }
+
+    // TC-TASK0033-1: フィールド追加後に一覧に表示される
+    @Test
+    fun addField_appearsInFieldList() {
+        val viewModel = createViewModel()
+        composeTestRule.setContent {
+            TemplateEditScreen(
+                templateId = null,
+                viewModel = viewModel,
+                onNavigateBack = {},
+            )
+        }
+        composeTestRule.onNodeWithText("フィールドを追加").performClick()
+        composeTestRule.onNodeWithText("フィールドキー名").performTextInput("source")
+        composeTestRule.onNodeWithText("追加").performClick()
+        composeTestRule.onNodeWithText("source").assertIsDisplayed()
+    }
+
+    // TC-TASK0033-2: valueSource=FIXED 選択時に defaultValue フィールドが表示
+    @Test
+    fun fixedSource_showsDefaultValueField() {
+        composeTestRule.setContent {
+            TemplateEditScreen(
+                templateId = null,
+                viewModel = createViewModel(),
+                onNavigateBack = {},
+            )
+        }
+        composeTestRule.onNodeWithText("フィールドを追加").performClick()
+        composeTestRule.onNodeWithText("固定値").performClick()
+        composeTestRule.onNodeWithText("デフォルト値").assertIsDisplayed()
+    }
 }
 
 private class FakeEditRepository : TemplateRepository {
