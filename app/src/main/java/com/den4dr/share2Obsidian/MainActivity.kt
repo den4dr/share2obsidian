@@ -25,8 +25,10 @@ import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.LoadingScreen
 import com.den4dr.share2Obsidian.ui.SettingsScreen
 import com.den4dr.share2Obsidian.util.WebViewExtractor
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     // 画面回転時も ViewModel インスタンスを保持するため viewModels() デリゲートを使用する（EDGE-101）
