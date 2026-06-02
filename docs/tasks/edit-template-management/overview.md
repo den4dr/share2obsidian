@@ -109,7 +109,7 @@ TASK-0033 → TASK-0034
 
 ### タスク一覧
 
-- [ ] [TASK-0035: ProcessedContent・WebViewExtractionResult モデル拡張](TASK-0035.md) - 4h (TDD) 🔵
+- [x] [TASK-0035: ProcessedContent・WebViewExtractionResult モデル拡張](TASK-0035.md) - 4h (TDD) 🔵
 - [ ] [TASK-0036: WebViewExtractor JS 拡張 + UrlContentProcessor メタデータ設定](TASK-0036.md) - 8h (TDD) 🔵
 - [ ] [TASK-0037: HtmlContentProcessor Jsoup メタデータ抽出実装](TASK-0037.md) - 6h (TDD) 🔵
 
