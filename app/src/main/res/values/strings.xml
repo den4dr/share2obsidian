@@ -27,4 +27,13 @@
     <string name="template_delete_confirm_title">テンプレートを削除</string>
     <string name="template_delete_confirm_message">「%1$s」を削除しますか？</string>
     <string name="template_delete_confirm_button">削除する</string>
+
+    <!-- テンプレート編集画面 -->
+    <string name="template_edit_title_new">テンプレート作成</string>
+    <string name="template_edit_title_edit">テンプレート編集</string>
+    <string name="template_name_label">テンプレート名</string>
+    <string name="template_vault_label">Vault</string>
+    <string name="template_folder_label">フォルダ</string>
+    <string name="template_default_label">デフォルトテンプレートに設定</string>
+    <string name="template_save_button">保存</string>
 </resources>
