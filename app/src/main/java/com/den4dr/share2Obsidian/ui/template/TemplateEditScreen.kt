@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -108,21 +109,16 @@ fun TemplateEditScreen(
             )
             Spacer(Modifier.height(8.dp))
 
+            // 本文テンプレート入力（{{content}} プレースホルダーを含む任意テキスト・複数行）
             OutlinedTextField(
-                value = uiState.vault,
-                onValueChange = { viewModel.updateVault(it) },
-                label = { Text(stringResource(R.string.template_vault_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-            )
-            Spacer(Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = uiState.folder,
-                onValueChange = { viewModel.updateFolder(it) },
-                label = { Text(stringResource(R.string.template_folder_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                value = uiState.body,
+                onValueChange = { viewModel.updateBody(it) },
+                label = { Text(stringResource(R.string.template_body_label)) },
+                supportingText = { Text(stringResource(R.string.template_body_supporting)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("template_body_field"),
+                minLines = 4,
             )
             Spacer(Modifier.height(16.dp))
 

@@ -18,8 +18,8 @@ import com.den4dr.share2Obsidian.content.HtmlContentProcessor
 import com.den4dr.share2Obsidian.content.ShareContent
 import com.den4dr.share2Obsidian.content.TextContentProcessor
 import com.den4dr.share2Obsidian.content.UrlContentProcessor
+import com.den4dr.share2Obsidian.data.datastore.NoteSettingsRepository
 import com.den4dr.share2Obsidian.format.NoteComposer
-import com.den4dr.share2Obsidian.format.NoteConfig
 import com.den4dr.share2Obsidian.ui.EditScreen
 import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.LoadingScreen
@@ -30,6 +30,7 @@ import com.den4dr.share2Obsidian.ui.template.TemplateListScreen
 import com.den4dr.share2Obsidian.util.WebViewExtractor
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -37,6 +38,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var templateRepository: TemplateRepository
+
+    @Inject
+    lateinit var noteSettingsRepository: NoteSettingsRepository
 
     // 画面回転時も ViewModel インスタンスを保持するため viewModels() デリゲートを使用する（EDGE-101）
     private val viewModel: EditScreenViewModel by viewModels()
@@ -53,18 +57,19 @@ class MainActivity : ComponentActivity() {
                 // 直接起動（アイコンタップ）→ 設定画面を表示（REQ-001）
                 setContent {
                     var showTemplateList by rememberSaveable { mutableStateOf(false) }
+                    // null=非表示, -1L=新規作成, 正数=既存編集
                     var editingTemplateId by rememberSaveable { mutableStateOf<Long?>(null) }
 
                     when {
                         editingTemplateId != null ->
                             TemplateEditScreen(
-                                templateId = editingTemplateId,
+                                templateId = editingTemplateId?.takeIf { it > 0 },
                                 onNavigateBack = { editingTemplateId = null },
                             )
                         showTemplateList ->
                             TemplateListScreen(
                                 onNavigateBack = { showTemplateList = false },
-                                onNavigateToEdit = { id -> editingTemplateId = id },
+                                onNavigateToEdit = { id -> editingTemplateId = id ?: -1L },
                             )
                         else ->
                             SettingsScreen(
@@ -93,26 +98,31 @@ class MainActivity : ComponentActivity() {
             }
 
             val defaultTemplate = templateRepository.getDefaultTemplate()
-            val config = TemplateApplicator.buildConfig(defaultTemplate)
+            // vault/folder は DataStore のグローバル設定から取得する（REQ-031）
+            val noteSettings = noteSettingsRepository.getSettings().first()
+            val config = TemplateApplicator.buildConfig(noteSettings)
+            // 本文テンプレートの {{content}} を共有コンテンツで解決する（REQ-032）
+            val resolvedBody = TemplateApplicator.buildBody(defaultTemplate, processed.body)
             val customFields = TemplateApplicator.buildCustomFields(defaultTemplate, processed)
-            viewModel.initialize(processed, config, customFields)
+            viewModel.initialize(processed.copy(body = resolvedBody), config, customFields)
 
             setContent {
                 // rememberSaveable で画面回転後も状態を復元する（EDGE-101）
                 var showSettings by rememberSaveable { mutableStateOf(false) }
                 var showTemplateList by rememberSaveable { mutableStateOf(false) }
+                // null=非表示, -1L=新規作成, 正数=既存編集
                 var editingTemplateId by rememberSaveable { mutableStateOf<Long?>(null) }
 
                 when {
                     editingTemplateId != null ->
                         TemplateEditScreen(
-                            templateId = editingTemplateId,
+                            templateId = editingTemplateId?.takeIf { it > 0 },
                             onNavigateBack = { editingTemplateId = null },
                         )
                     showTemplateList ->
                         TemplateListScreen(
                             onNavigateBack = { showTemplateList = false },
-                            onNavigateToEdit = { id -> editingTemplateId = id },
+                            onNavigateToEdit = { id -> editingTemplateId = id ?: -1L },
                         )
                     showSettings ->
                         SettingsScreen(
@@ -122,11 +132,11 @@ class MainActivity : ComponentActivity() {
                     else ->
                         EditScreen(
                             viewModel = viewModel,
-                            config = config,
                             onSend = { sendParams ->
                                 val content = NoteComposer.buildFrontmatter(
                                     sendParams.body,
                                     sendParams.tags,
+                                    sendParams.customFields,
                                 )
                                 val uri = NoteComposer.buildUri(content, sendParams.title, sendParams.config)
                                 try {

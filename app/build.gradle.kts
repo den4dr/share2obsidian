@@ -44,6 +44,13 @@ android {
             isIncludeAndroidResources = true
         }
     }
+    // Room の MigrationTestHelper がエクスポート済みスキーマ JSON を読めるよう
+    // schemas ディレクトリを androidTest の assets に含める
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDir(files("$projectDir/schemas"))
+        }
+    }
 }
 
 ksp {
@@ -65,6 +72,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.hilt.navigation.compose)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
@@ -75,6 +83,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.room.testing)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

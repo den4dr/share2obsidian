@@ -27,7 +27,7 @@ class EditScreenViewModel : ViewModel() {
     // 【状態定義】: フォーム状態を保持する MutableStateFlow。外部には asStateFlow() でイミュータブルに公開する 🔵
     // 【初期値】: initialize() 呼び出し前のデフォルト値。すべて空文字列で初期化する 🟡
     private val _formState = MutableStateFlow(
-        EditFormState(title = "", body = "", tagsText = "", folder = "")
+        EditFormState(vault = "", title = "", body = "", tagsText = "", folder = "")
     )
 
     /**
@@ -68,6 +68,8 @@ class EditScreenViewModel : ViewModel() {
 
         // 【状態更新】: ProcessedContent と NoteConfig から EditFormState の初期値を構築して StateFlow に設定する 🔵
         _formState.value = EditFormState(
+            // 【Vault 初期値】: NoteConfig.vault（DataStore 由来）で初期化する（REQ-061, REQ-022）🔵
+            vault = config.vault,
             // 【タイトル初期値】: ProcessedContent.title が null の場合は空文字列で初期化する（TC-003-02）🔵
             title = processed.title ?: "",
             // 【本文初期値】: ProcessedContent.body をそのまま使用する（EDGE-002 空文字許容）🔵
@@ -145,6 +147,17 @@ class EditScreenViewModel : ViewModel() {
     }
 
     /**
+     * 【機能概要】: フォーム状態の Vault フィールドを更新する（REQ-061）
+     * 【実装方針】: `copy()` で vault のみを変更したイミュータブルな新しい状態を生成し、StateFlow に設定する。
+     * 🔵 信頼性レベル: REQ-061・REQ-023 より
+     *
+     * @param vault 新しい Vault 名
+     */
+    fun updateVault(vault: String) {
+        _formState.value = _formState.value.copy(vault = vault)
+    }
+
+    /**
      * 【機能概要】: フォーム状態から送信パラメータ（SendParams）を構築して返す
      * 【実装方針】:
      *   - `title`: 空文字列・スペースのみの場合は `ifBlank { null }` で null に変換する（EDGE-001）
@@ -158,7 +171,7 @@ class EditScreenViewModel : ViewModel() {
      * @return タグパース・タイトル null 変換済みの送信パラメータ（`SendParams`）
      * @see parseTagsText タグ文字列のカンマ区切りパース処理（TASK-0016 実装）
      */
-    fun buildSendParams(config: NoteConfig): SendParams {
+    fun buildSendParams(): SendParams {
         // 【現在の状態取得】: StateFlow から最新のフォーム状態を取り出す 🔵
         val state = _formState.value
 
@@ -169,8 +182,12 @@ class EditScreenViewModel : ViewModel() {
             body = state.body,
             // 【タグパース】: カンマ区切りのタグ文字列を List<String> に変換する（REQ-103）🔵
             tags = parseTagsText(state.tagsText),
-            // 【設定渡し】: メソッド引数の NoteConfig をそのまま SendParams に設定する（REQ-405）🔵
-            config = config,
+            // 【設定構築】: EditFormState の vault/folder から NoteConfig を構築する（REQ-062, REQ-024）🔵
+            config = NoteConfig(
+                vault = state.vault,
+                folder = state.folder,
+                defaultTags = emptyList(),
+            ),
             // 【カスタムフィールド渡し】: フォーム状態のカスタムフィールドを SendParams に渡す（REQ-052）🔵
             customFields = state.customFields,
         )

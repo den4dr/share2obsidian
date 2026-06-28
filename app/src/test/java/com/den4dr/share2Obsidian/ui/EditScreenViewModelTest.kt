@@ -101,6 +101,11 @@ class EditScreenViewModelTest {
             "70_clippings",
             viewModel.formState.value.folder
         ) // 【確認内容】: folder = config.folder のマッピング 🔵
+        assertEquals(
+            "Vault が config.vault の値で初期化されていること（REQ-061）",
+            "testVault",
+            viewModel.formState.value.vault
+        ) // 【確認内容】: vault = config.vault のマッピング 🔵
     }
 
     /**
@@ -348,7 +353,7 @@ class EditScreenViewModelTest {
         // Act
         // 【実際の処理実行】: 送信ボタンタップ時のパラメータ生成を呼び出す
         // 【処理内容】: parseTagsText(tagsText) でカンマ区切りリストに変換する
-        val sendParams = viewModel.buildSendParams(standardConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
         // 【結果検証】: タグが正しくパースされていること
@@ -391,14 +396,20 @@ class EditScreenViewModelTest {
         viewModel.initialize(standardProcessed, customConfig)
 
         // Act
-        val sendParams = viewModel.buildSendParams(customConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
+        // buildSendParams() は EditFormState の vault/folder から config を構築する（REQ-062）
         assertEquals(
-            "buildSendParams で引数の config がそのまま SendParams に設定されること",
-            customConfig,
-            sendParams.config
-        ) // 【確認内容】: config が変更されずに SendParams に設定されていること 🔵
+            "buildSendParams で config.vault が EditFormState 由来であること",
+            "myVault",
+            sendParams.config.vault
+        ) // 【確認内容】: vault が EditFormState.vault（customConfig.vault 由来）であること 🔵
+        assertEquals(
+            "buildSendParams で config.folder が EditFormState 由来であること",
+            "inbox",
+            sendParams.config.folder
+        ) // 【確認内容】: folder が EditFormState.folder（customConfig.folder 由来）であること 🔵
     }
 
     // ================================================================
@@ -425,7 +436,7 @@ class EditScreenViewModelTest {
         // Act
         // 【実際の処理実行】: 空タイトルで送信パラメータを生成
         // 【処理内容】: state.title.ifBlank { null } により "" → null に変換される
-        val sendParams = viewModel.buildSendParams(standardConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
         // 【結果検証】: 空文字タイトルが null に変換されていること
@@ -455,7 +466,7 @@ class EditScreenViewModelTest {
         // Act
         // 【実際の処理実行】: スペースのみのタイトルで送信パラメータを生成
         // 【処理内容】: state.title.ifBlank { null } により "   " → null に変換される
-        val sendParams = viewModel.buildSendParams(standardConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
         // 【結果検証】: スペースのみのタイトルが null に変換されていること
@@ -483,7 +494,7 @@ class EditScreenViewModelTest {
         viewModel.updateBody("")
 
         // Act
-        val sendParams = viewModel.buildSendParams(standardConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
         // 【結果検証】: 空文字本文がそのまま SendParams に設定されていること
@@ -512,7 +523,7 @@ class EditScreenViewModelTest {
         viewModel.updateTagsText("")
 
         // Act
-        val sendParams = viewModel.buildSendParams(standardConfig)
+        val sendParams = viewModel.buildSendParams()
 
         // Assert
         // 【結果検証】: 空タグテキストが emptyList() に変換されていること
@@ -689,7 +700,7 @@ class EditScreenViewModelTest {
             CustomFieldState("source", "https://example.com", FieldValueType.STRING)
         )
         viewModel.initialize(standardProcessed, standardConfig, customFields)
-        val params = viewModel.buildSendParams(standardConfig)
+        val params = viewModel.buildSendParams()
         assertEquals(customFields, params.customFields)
     }
 }

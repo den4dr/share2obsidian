@@ -91,6 +91,34 @@ class TemplateEditScreenTest {
         composeTestRule.onNodeWithText("source").assertIsDisplayed()
     }
 
+    // TC-051-01/02: vault/folder 入力欄が存在しない
+    @Test
+    fun vaultAndFolderFields_notPresent() {
+        composeTestRule.setContent {
+            TemplateEditScreen(
+                templateId = null,
+                viewModel = createViewModel(),
+                onNavigateBack = {},
+            )
+        }
+        composeTestRule.onNodeWithText("Vault").assertDoesNotExist()
+    }
+
+    // TC-051-03/04: 本文テンプレート入力が ViewModel に反映される
+    @Test
+    fun bodyInput_updatesViewModel() {
+        val viewModel = createViewModel()
+        composeTestRule.setContent {
+            TemplateEditScreen(
+                templateId = null,
+                viewModel = viewModel,
+                onNavigateBack = {},
+            )
+        }
+        composeTestRule.onNodeWithText("本文テンプレート").performTextInput("## 記事\n{{content}}")
+        assertEquals("## 記事\n{{content}}", viewModel.uiState.value.body)
+    }
+
     // TC-TASK0033-2: valueSource=FIXED 選択時に defaultValue フィールドが表示
     @Test
     fun fixedSource_showsDefaultValueField() {

@@ -8,6 +8,11 @@
     <string name="label_body">本文</string>
     <string name="label_tags">タグ（カンマ区切り）</string>
     <string name="label_folder">フォルダ</string>
+    <string name="label_vault">Vault</string>
+
+    <!-- EditScreen セクション見出し -->
+    <string name="edit_section_filename">ファイル名</string>
+    <string name="edit_section_frontmatter">Frontmatter</string>
 
     <!-- 編集・プレビュー機能: ボタン -->
     <string name="button_send">送信</string>
@@ -16,6 +21,8 @@
     <!-- 設定画面 -->
     <string name="label_settings">設定</string>
     <string name="settings_placeholder">設定項目はまだ実装されていません</string>
+    <string name="settings_vault_label">デフォルト Vault</string>
+    <string name="settings_folder_label">デフォルトフォルダ</string>
 
     <!-- テンプレート管理画面 -->
     <string name="template_list_title">テンプレート管理</string>
@@ -32,8 +39,8 @@
     <string name="template_edit_title_new">テンプレート作成</string>
     <string name="template_edit_title_edit">テンプレート編集</string>
     <string name="template_name_label">テンプレート名</string>
-    <string name="template_vault_label">Vault</string>
-    <string name="template_folder_label">フォルダ</string>
+    <string name="template_body_label">本文テンプレート</string>
+    <string name="template_body_supporting">{{content}} を含めると共有コンテンツがその位置に挿入されます</string>
     <string name="template_default_label">デフォルトテンプレートに設定</string>
     <string name="template_save_button">保存</string>
 

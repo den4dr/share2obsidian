@@ -3,6 +3,7 @@ package com.den4dr.share2Obsidian.ui
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
@@ -86,7 +87,6 @@ class EditScreenTest {
             // 【初期条件設定】: EditScreen を表示する（EditScreen.kt 未実装のためコンパイルエラーになる）
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
             )
@@ -115,7 +115,6 @@ class EditScreenTest {
             // 【初期条件設定】: EditScreen を複数行本文フィールド付きで表示する
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
             )
@@ -143,7 +142,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
             )
@@ -171,7 +169,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
             )
@@ -203,7 +200,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
             )
@@ -242,7 +238,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { params -> captured.add(params) }, // 【コールバックモック】: 呼び出し引数をキャプチャ
                 onCancel = {},
             )
@@ -259,7 +254,9 @@ class EditScreenTest {
         assertEquals("テストタイトル", captured[0].title)          // 【確認内容】: タイトルが送信値に反映 🔵
         assertEquals("テスト本文", captured[0].body)              // 【確認内容】: 本文が送信値に反映 🔵
         assertEquals(listOf("shared"), captured[0].tags)         // 【確認内容】: タグがパース済みで反映 🔵
-        assertEquals(testConfig, captured[0].config)             // 【確認内容】: NoteConfig がそのまま渡される 🔵
+        // buildSendParams() は EditFormState 由来の vault/folder で config を構築する（REQ-062）
+        assertEquals("testVault", captured[0].config.vault)      // 【確認内容】: vault が EditFormState 由来で反映 🔵
+        assertEquals("70_clippings", captured[0].config.folder)  // 【確認内容】: folder が EditFormState 由来で反映 🔵
     }
 
     /**
@@ -281,7 +278,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { sendCount++ },    // 【コールバックモック】: onSend 発火回数を記録
                 onCancel = { cancelCount++ }, // 【コールバックモック】: onCancel 発火回数を記録
             )
@@ -321,7 +317,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { params -> captured.add(params) },
                 onCancel = {},
             )
@@ -361,7 +356,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { params -> captured.add(params) },
                 onCancel = {},
             )
@@ -395,7 +389,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { params -> captured.add(params) },
                 onCancel = {},
             )
@@ -429,7 +422,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { params -> captured.add(params) },
                 onCancel = {},
                 onNavigateToSettings = {},
@@ -466,7 +458,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { sendCount++ },
                 onCancel = { cancelCount++ },
                 onNavigateToSettings = {},
@@ -507,7 +498,6 @@ class EditScreenTest {
             // 【初期条件設定】: EditScreen を表示して BackHandler が登録された状態にする
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = { sendCount++ },
                 onCancel = { cancelCount++ },
                 onNavigateToSettings = {},
@@ -549,7 +539,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
                 onNavigateToSettings = {},
@@ -562,6 +551,23 @@ class EditScreenTest {
         composeTestRule.onNodeWithText("キャンセル").assertIsDisplayed() // 【確認内容】: キャンセルボタンが常に表示される（NFR-102）🟡
     }
 
+    // TC-041: 表示順（vault → folder → title → body）の各フィールドが存在する
+    @Test
+    fun `TC-041 vault folder title body フィールドが存在する`() {
+        val viewModel = createViewModel()
+        composeTestRule.setContent {
+            EditScreen(
+                viewModel = viewModel,
+                onSend = {},
+                onCancel = {},
+            )
+        }
+        composeTestRule.onNodeWithTag("vault_field").assertExists()
+        composeTestRule.onNodeWithTag("folder_field").assertExists()
+        composeTestRule.onNodeWithTag("title_field").assertExists()
+        composeTestRule.onNodeWithTag("body_field").assertExists()
+    }
+
     // TC-CUSTOM-UI-001: customFields が空の場合、カスタムフィールドセクションが非表示
     @Test
     fun `TC-CUSTOM-UI-001 customFields が空のとき セクションが非表示`() {
@@ -569,7 +575,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
                 onNavigateToSettings = {},
@@ -588,13 +593,11 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
                 onNavigateToSettings = {},
             )
         }
-        composeTestRule.onNodeWithText("カスタムフィールド").assertIsDisplayed()
         composeTestRule.onNodeWithText("source").assertIsDisplayed()
         composeTestRule.onNodeWithText("https://example.com").assertIsDisplayed()
     }
@@ -609,7 +612,6 @@ class EditScreenTest {
         composeTestRule.setContent {
             EditScreen(
                 viewModel = viewModel,
-                config = testConfig,
                 onSend = {},
                 onCancel = {},
                 onNavigateToSettings = {},

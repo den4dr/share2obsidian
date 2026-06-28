@@ -24,10 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.den4dr.share2Obsidian.R
-import com.den4dr.share2Obsidian.format.NoteConfig
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 
@@ -47,7 +47,6 @@ import androidx.compose.material3.MaterialTheme
 @Composable
 fun EditScreen(
     viewModel: EditScreenViewModel,
-    config: NoteConfig,
     onSend: (SendParams) -> Unit,
     onCancel: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
@@ -85,7 +84,7 @@ fun EditScreen(
                     Text(stringResource(R.string.button_cancel))
                 }
                 Button(
-                    onClick = { onSend(viewModel.buildSendParams(config)) },
+                    onClick = { onSend(viewModel.buildSendParams()) },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.button_send))
@@ -101,19 +100,48 @@ fun EditScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            // ① vault（保存先 Vault）— REQ-041 表示順の最上部、REQ-043
+            OutlinedTextField(
+                value = formState.vault,
+                onValueChange = { viewModel.updateVault(it) },
+                label = { Text(stringResource(R.string.label_vault)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("vault_field"),
+                singleLine = true,
+            )
+            // ② folder（保存先フォルダ）
             OutlinedTextField(
                 value = formState.folder,
                 onValueChange = { viewModel.updateFolder(it) },
                 label = { Text(stringResource(R.string.label_folder)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("folder_field"),
                 singleLine = true,
+            )
+
+            // ③ title（ファイル名）— frontmatter とは別セクション（REQ-042）
+            HorizontalDivider()
+            Text(
+                text = stringResource(R.string.edit_section_filename),
+                style = MaterialTheme.typography.titleSmall,
             )
             OutlinedTextField(
                 value = formState.title,
                 onValueChange = { viewModel.updateTitle(it) },
                 label = { Text(stringResource(R.string.label_title)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("title_field"),
                 singleLine = true,
+            )
+
+            // ④ frontmatter（タグ + カスタムフィールド）セクション
+            HorizontalDivider()
+            Text(
+                text = stringResource(R.string.edit_section_frontmatter),
+                style = MaterialTheme.typography.titleSmall,
             )
             OutlinedTextField(
                 value = formState.tagsText,
@@ -122,29 +150,27 @@ fun EditScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
+            formState.customFields.forEachIndexed { index, field ->
+                OutlinedTextField(
+                    value = field.value,
+                    onValueChange = { viewModel.updateCustomField(index, it) },
+                    label = { Text(field.key) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                )
+            }
+
+            // ⑤ body（本文）— 最下部（REQ-041）
+            HorizontalDivider()
             OutlinedTextField(
                 value = formState.body,
                 onValueChange = { viewModel.updateBody(it) },
                 label = { Text(stringResource(R.string.label_body)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("body_field"),
                 minLines = 5,
             )
-            if (formState.customFields.isNotEmpty()) {
-                HorizontalDivider()
-                Text(
-                    text = stringResource(R.string.custom_fields_section_header),
-                    style = MaterialTheme.typography.titleSmall,
-                )
-                formState.customFields.forEachIndexed { index, field ->
-                    OutlinedTextField(
-                        value = field.value,
-                        onValueChange = { viewModel.updateCustomField(index, it) },
-                        label = { Text(field.key) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                    )
-                }
-            }
         }
     }
 }

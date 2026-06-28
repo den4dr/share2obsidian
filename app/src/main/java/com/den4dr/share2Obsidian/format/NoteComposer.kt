@@ -35,8 +35,12 @@ object NoteComposer {
     fun buildUri(content: String, title: String?, config: NoteConfig): Uri {
         val builder = Uri.parse("obsidian://new").buildUpon()
             .appendQueryParameter("content", content)
-            .appendQueryParameter("vault", config.vault)
-            .appendQueryParameter("folder", config.folder)
+        if (config.vault.isNotBlank()) {
+            builder.appendQueryParameter("vault", config.vault)
+        }
+        if (config.folder.isNotBlank()) {
+            builder.appendQueryParameter("folder", config.folder)
+        }
         if (!title.isNullOrBlank()) {
             builder.appendQueryParameter("name", title)
         }

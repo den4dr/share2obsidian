@@ -10,12 +10,16 @@ class TemplateTest {
     fun `Template defaults - id is 0 and isDefault is false`() {
         val template = Template(
             name = "Web記事",
-            vault = "myVault",
-            folder = "Clippings",
             fields = emptyList(),
         )
         assertEquals(0L, template.id)
         assertEquals(false, template.isDefault)
+    }
+
+    @Test
+    fun `Template body defaults to empty string`() {
+        val template = Template(name = "test", fields = emptyList(), isDefault = false)
+        assertEquals("", template.body)
     }
 
     @Test
@@ -73,7 +77,7 @@ class TemplateTest {
 
     @Test
     fun `Template copy with updated isDefault`() {
-        val original = Template(name = "Test", vault = "", folder = "", fields = emptyList())
+        val original = Template(name = "Test", fields = emptyList())
         val updated = original.copy(isDefault = true)
         assertEquals(true, updated.isDefault)
         assertEquals(original.name, updated.name)

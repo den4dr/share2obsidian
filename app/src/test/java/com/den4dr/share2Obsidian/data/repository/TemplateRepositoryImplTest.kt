@@ -8,7 +8,6 @@ import com.den4dr.share2Obsidian.domain.model.FieldValueSource
 import com.den4dr.share2Obsidian.domain.model.FieldValueType
 import com.den4dr.share2Obsidian.domain.model.HtmlMetaKey
 import com.den4dr.share2Obsidian.domain.model.Template
-import com.den4dr.share2Obsidian.domain.model.TemplateField
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -37,10 +35,10 @@ class TemplateRepositoryImplTest {
         repository = TemplateRepositoryImpl(dao)
     }
 
-    // TC-1: getAllTemplates が Flow を正しく変換
+    // TC-1: getAllTemplates が Flow を正しく変換（body マッピング含む）
     @Test
     fun getAllTemplates_convertsTodomainModels() = runBlocking {
-        val entity = TemplateEntity(id = 1L, name = "テスト", vault = "MyVault", folder = "notes", isDefault = false)
+        val entity = TemplateEntity(id = 1L, name = "テスト", body = "## 記事\n{{content}}", isDefault = false)
         val withFields = TemplateWithFields(template = entity, fields = emptyList())
         every { dao.getAllTemplatesWithFields() } returns flowOf(listOf(withFields))
 
@@ -48,8 +46,7 @@ class TemplateRepositoryImplTest {
 
         assertEquals(1, result.size)
         assertEquals("テスト", result[0].name)
-        assertEquals("MyVault", result[0].vault)
-        assertEquals("notes", result[0].folder)
+        assertEquals("## 記事\n{{content}}", result[0].body)
         assertFalse(result[0].isDefault)
     }
 
@@ -59,8 +56,7 @@ class TemplateRepositoryImplTest {
         val template = Template(
             id = 1L,
             name = "テスト",
-            vault = "v",
-            folder = "f",
+            body = "b",
             isDefault = true,
             fields = emptyList(),
         )
@@ -80,8 +76,7 @@ class TemplateRepositoryImplTest {
         val template = Template(
             id = 0L,
             name = "テスト",
-            vault = "v",
-            folder = "f",
+            body = "",
             isDefault = false,
             fields = emptyList(),
         )
@@ -94,14 +89,13 @@ class TemplateRepositoryImplTest {
         coVerify(exactly = 0) { dao.clearDefaultExcept(any()) }
     }
 
-    // TC-3: deleteTemplate で dao.deleteTemplate が呼ばれる
+    // TC-3: deleteTemplate で dao.deleteTemplate が呼ばれる（body マッピング含む）
     @Test
     fun deleteTemplate_callsDaoDeleteTemplate() = runBlocking {
         val template = Template(
             id = 5L,
             name = "テスト",
-            vault = "v",
-            folder = "f",
+            body = "body",
             isDefault = false,
             fields = emptyList(),
         )
@@ -111,7 +105,7 @@ class TemplateRepositoryImplTest {
 
         coVerify {
             dao.deleteTemplate(
-                TemplateEntity(id = 5L, name = "テスト", vault = "v", folder = "f", isDefault = false)
+                TemplateEntity(id = 5L, name = "テスト", body = "body", isDefault = false)
             )
         }
     }
@@ -119,7 +113,7 @@ class TemplateRepositoryImplTest {
     // TC-4: TemplateWithFields.toDomain() マッピング確認
     @Test
     fun getAllTemplates_mapsAllFieldsCorrectly() = runBlocking {
-        val templateEntity = TemplateEntity(id = 1L, name = "テスト", vault = "v", folder = "f", isDefault = true)
+        val templateEntity = TemplateEntity(id = 1L, name = "テスト", body = "本文", isDefault = true)
         val fieldEntity = TemplateFieldEntity(
             id = 10L,
             templateId = 1L,
@@ -139,8 +133,7 @@ class TemplateRepositoryImplTest {
         val template = result[0]
         assertEquals(1L, template.id)
         assertEquals("テスト", template.name)
-        assertEquals("v", template.vault)
-        assertEquals("f", template.folder)
+        assertEquals("本文", template.body)
         assertTrue(template.isDefault)
         assertEquals(1, template.fields.size)
 
@@ -158,7 +151,7 @@ class TemplateRepositoryImplTest {
     // TC-4b: metaKey が空文字の場合 null にマッピング
     @Test
     fun getAllTemplates_emptyMetaKey_mapsToNull() = runBlocking {
-        val templateEntity = TemplateEntity(id = 1L, name = "t", vault = "v", folder = "f", isDefault = false)
+        val templateEntity = TemplateEntity(id = 1L, name = "t", body = "", isDefault = false)
         val fieldEntity = TemplateFieldEntity(
             id = 1L,
             templateId = 1L,

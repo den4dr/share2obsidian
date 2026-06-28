@@ -21,8 +21,7 @@ import javax.inject.Inject
 data class TemplateEditUiState(
     val templateId: Long? = null,
     val name: String = "",
-    val vault: String = "",
-    val folder: String = "",
+    val body: String = "",
     val isDefault: Boolean = false,
     val fields: List<TemplateFieldEditState> = emptyList(),
     val isSaving: Boolean = false,
@@ -67,8 +66,7 @@ class TemplateEditViewModel @Inject constructor(
                 TemplateEditUiState(
                     templateId = template.id,
                     name = template.name,
-                    vault = template.vault,
-                    folder = template.folder,
+                    body = template.body,
                     isDefault = template.isDefault,
                     fields = template.fields.map { field ->
                         TemplateFieldEditState(
@@ -92,8 +90,7 @@ class TemplateEditViewModel @Inject constructor(
     }
 
     fun updateName(name: String) = _uiState.update { it.copy(name = name) }
-    fun updateVault(vault: String) = _uiState.update { it.copy(vault = vault) }
-    fun updateFolder(folder: String) = _uiState.update { it.copy(folder = folder) }
+    fun updateBody(body: String) = _uiState.update { it.copy(body = body) }
     fun updateIsDefault(isDefault: Boolean) = _uiState.update { it.copy(isDefault = isDefault) }
 
     fun addField(field: TemplateFieldEditState) = _uiState.update {
@@ -117,8 +114,7 @@ class TemplateEditViewModel @Inject constructor(
             val template = Template(
                 id = state.templateId ?: 0L,
                 name = state.name,
-                vault = state.vault,
-                folder = state.folder,
+                body = state.body,
                 isDefault = state.isDefault,
                 fields = state.fields.mapIndexed { index, field ->
                     TemplateField(

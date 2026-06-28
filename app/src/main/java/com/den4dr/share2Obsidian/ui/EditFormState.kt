@@ -22,6 +22,8 @@ package com.den4dr.share2Obsidian.ui
  * @param folder フォルダフィールドの現在値（config.folder で初期化）
  */
 data class EditFormState(
+    // 【フィールド定義】: Vault フィールドの現在値。config.vault（DataStore 由来）で初期化する（REQ-061）🔵
+    val vault: String = "",
     // 【フィールド定義】: タイトルフィールドの現在値。null は空文字列 "" として扱う（EDGE-001）🔵
     val title: String,
     // 【フィールド定義】: 本文フィールドの現在値。空文字列を許容する（EDGE-002）🔵

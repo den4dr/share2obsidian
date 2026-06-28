@@ -45,7 +45,7 @@ class TemplateListViewModelTest {
     @Test
     fun uiState_reflectsTemplateList() = runTest(testDispatcher) {
         val templates = listOf(
-            Template(id = 1L, name = "テスト", vault = "v", folder = "f", isDefault = false, fields = emptyList())
+            Template(id = 1L, name = "テスト", isDefault = false, fields = emptyList())
         )
         every { repository.getAllTemplates() } returns flowOf(templates)
         val vm = TemplateListViewModel(repository)
@@ -62,7 +62,7 @@ class TemplateListViewModelTest {
     @Test
     fun deleteTemplate_callsRepository() {
         val template = Template(
-            id = 1L, name = "テスト", vault = "v", folder = "f", isDefault = false, fields = emptyList()
+            id = 1L, name = "テスト", isDefault = false, fields = emptyList()
         )
         coEvery { repository.deleteTemplate(template) } just Runs
 

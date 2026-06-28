@@ -73,14 +73,13 @@ class TemplateEditViewModelTest {
         assertTrue(viewModel.uiState.value.isSaved)
     }
 
-    // TC-4: 既存テンプレート編集時に loadTemplate でフィールドが設定される
+    // TC-4: 既存テンプレート編集時に loadTemplate でフィールドが設定される（body 含む）
     @Test
     fun loadTemplate_setsUiStateFromRepository() {
         val template = Template(
             id = 1L,
             name = "既存テンプレート",
-            vault = "MyVault",
-            folder = "notes",
+            body = "## 記事\n{{content}}",
             isDefault = true,
             fields = emptyList(),
         )
@@ -90,8 +89,30 @@ class TemplateEditViewModelTest {
         Thread.sleep(200)
 
         assertEquals("既存テンプレート", viewModel.uiState.value.name)
-        assertEquals("MyVault", viewModel.uiState.value.vault)
-        assertEquals("notes", viewModel.uiState.value.folder)
+        assertEquals("## 記事\n{{content}}", viewModel.uiState.value.body)
         assertTrue(viewModel.uiState.value.isDefault)
+    }
+
+    // TC-5: updateBody が uiState.body を更新する
+    @Test
+    fun updateBody_updatesUiState() {
+        val viewModel = createViewModel()
+        viewModel.updateBody("## メモ\n{{content}}")
+        assertEquals("## メモ\n{{content}}", viewModel.uiState.value.body)
+    }
+
+    // TC-6: save() が body を含む Template を保存する
+    @Test
+    fun save_persistsBody() {
+        val viewModel = createViewModel()
+        viewModel.updateName("テスト")
+        viewModel.updateBody("固定テキスト")
+        val slot = mutableListOf<Template>()
+        coEvery { repository.saveTemplate(capture(slot)) } returns 1L
+
+        viewModel.save()
+        Thread.sleep(200)
+
+        assertEquals("固定テキスト", slot.last().body)
     }
 }

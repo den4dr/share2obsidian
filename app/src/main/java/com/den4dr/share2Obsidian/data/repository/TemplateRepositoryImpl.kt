@@ -43,8 +43,7 @@ class TemplateRepositoryImpl @Inject constructor(
     private fun TemplateWithFields.toDomain(): Template = Template(
         id = template.id,
         name = template.name,
-        vault = template.vault,
-        folder = template.folder,
+        body = template.body,
         isDefault = template.isDefault,
         fields = fields.map { it.toDomain() },
     )
@@ -63,8 +62,7 @@ class TemplateRepositoryImpl @Inject constructor(
     private fun Template.toEntity(): TemplateEntity = TemplateEntity(
         id = id,
         name = name,
-        vault = vault,
-        folder = folder,
+        body = body,
         isDefault = isDefault,
     )
 

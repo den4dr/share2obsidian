@@ -35,7 +35,7 @@ class TemplateDaoTest {
     @Test
     fun insertTemplate_andGetAll() = runBlocking {
         dao.insertTemplate(
-            TemplateEntity(name = "テスト", vault = "MyVault", folder = "notes", isDefault = false)
+            TemplateEntity(name = "テスト", body = "", isDefault = false)
         )
         val result = dao.getAllTemplatesWithFields().first()
         assertEquals(1, result.size)
@@ -45,7 +45,7 @@ class TemplateDaoTest {
     @Test
     fun getDefaultTemplate_returnsDefault() = runBlocking {
         dao.insertTemplate(
-            TemplateEntity(name = "デフォルト", vault = "MyVault", folder = "notes", isDefault = true)
+            TemplateEntity(name = "デフォルト", body = "", isDefault = true)
         )
         val result = dao.getDefaultTemplateWithFields()
         assertNotNull(result)
@@ -55,7 +55,7 @@ class TemplateDaoTest {
     @Test
     fun deleteTemplate_cascadesFields() = runBlocking {
         val templateId = dao.insertTemplate(
-            TemplateEntity(name = "テスト", vault = "v", folder = "f", isDefault = false)
+            TemplateEntity(name = "テスト", body = "", isDefault = false)
         )
         dao.insertFields(
             listOf(
@@ -74,7 +74,7 @@ class TemplateDaoTest {
         assertEquals(1, before!!.fields.size)
 
         dao.deleteTemplate(
-            TemplateEntity(id = templateId, name = "テスト", vault = "v", folder = "f", isDefault = false)
+            TemplateEntity(id = templateId, name = "テスト", body = "", isDefault = false)
         )
         val after = dao.getTemplateWithFieldsById(templateId)
         assertNull(after)
@@ -86,10 +86,10 @@ class TemplateDaoTest {
     @Test
     fun clearDefaultExcept_clearsOthers() = runBlocking {
         val id1 = dao.insertTemplate(
-            TemplateEntity(name = "T1", vault = "v", folder = "f", isDefault = true)
+            TemplateEntity(name = "T1", body = "", isDefault = true)
         )
         val id2 = dao.insertTemplate(
-            TemplateEntity(name = "T2", vault = "v", folder = "f", isDefault = true)
+            TemplateEntity(name = "T2", body = "", isDefault = true)
         )
         dao.clearDefaultExcept(id2)
         val t1 = dao.getTemplateWithFieldsById(id1)

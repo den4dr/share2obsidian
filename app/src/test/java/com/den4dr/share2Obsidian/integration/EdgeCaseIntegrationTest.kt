@@ -1,9 +1,9 @@
 package com.den4dr.share2Obsidian.integration
 
-import com.den4dr.share2Obsidian.AppConfig
 import com.den4dr.share2Obsidian.TemplateApplicator
 import com.den4dr.share2Obsidian.content.ContentKind
 import com.den4dr.share2Obsidian.content.ProcessedContent
+import com.den4dr.share2Obsidian.data.datastore.NoteSettings
 import com.den4dr.share2Obsidian.domain.model.CustomFieldState
 import com.den4dr.share2Obsidian.domain.model.FieldValueSource
 import com.den4dr.share2Obsidian.domain.model.FieldValueType
@@ -18,19 +18,19 @@ import org.junit.Test
 
 class EdgeCaseIntegrationTest {
 
-    // EDGE-001: テンプレートなし → AppConfig フォールバック
+    // EDGE-003(設定未設定): NoteSettings 未設定 → vault/folder が空文字列
     @Test
-    fun edge001_noTemplate_usesAppConfigFallback() {
-        val config = TemplateApplicator.buildConfig(null)
-        assertEquals(AppConfig.OBSIDIAN_VAULT, config.vault)
-        assertEquals(AppConfig.OBSIDIAN_FOLDER, config.folder)
+    fun emptyNoteSettings_returnsEmptyVaultAndFolder() {
+        val config = TemplateApplicator.buildConfig(NoteSettings())
+        assertEquals("", config.vault)
+        assertEquals("", config.folder)
     }
 
     // EDGE-003: WebView タイムアウト → metadata が emptyMap() → カスタムフィールドが空
     @Test
     fun edge003_webviewTimeout_emptyMetadata() {
         val template = Template(
-            id = 1L, name = "t", vault = "v", folder = "f", isDefault = true,
+            id = 1L, name = "t", isDefault = true,
             fields = listOf(
                 TemplateField(
                     key = "title",
@@ -54,7 +54,7 @@ class EdgeCaseIntegrationTest {
     @Test
     fun edge004_htmlShare_nullSourceUrl() {
         val template = Template(
-            id = 1L, name = "t", vault = "v", folder = "f", isDefault = true,
+            id = 1L, name = "t", isDefault = true,
             fields = listOf(
                 TemplateField(
                     key = "source",
@@ -83,11 +83,12 @@ class EdgeCaseIntegrationTest {
         assertFalse(result.contains("tags: [shared]"))
     }
 
-    // 統合確認: テンプレートあり → config が正しく設定され → Frontmatter に反映
+    // 統合確認: DataStore 設定 → config が正しく設定され → body 解決 → Frontmatter に反映
     @Test
-    fun integration_templateApplied_frontmatterCorrect() {
+    fun integration_settingsAndTemplateApplied_frontmatterCorrect() {
         val template = Template(
-            id = 1L, name = "Web記事", vault = "WebVault", folder = "Articles",
+            id = 1L, name = "Web記事",
+            body = "## 記事\n{{content}}",
             isDefault = true,
             fields = listOf(
                 TemplateField(
@@ -102,13 +103,15 @@ class EdgeCaseIntegrationTest {
             contentType = ContentKind.URL,
             sourceUrl = "https://example.com",
         )
-        val config = TemplateApplicator.buildConfig(template)
+        val config = TemplateApplicator.buildConfig(NoteSettings(vault = "WebVault", folder = "Articles"))
+        val resolvedBody = TemplateApplicator.buildBody(template, processed.body)
         val customFields = TemplateApplicator.buildCustomFields(template, processed)
 
         assertEquals("WebVault", config.vault)
         assertEquals("Articles", config.folder)
+        assertEquals("## 記事\n記事本文", resolvedBody)
 
-        val frontmatter = NoteComposer.buildFrontmatter("記事本文", config.defaultTags, customFields)
+        val frontmatter = NoteComposer.buildFrontmatter(resolvedBody, config.defaultTags, customFields)
         assertTrue(frontmatter.contains("source: https://example.com"))
         assertTrue(frontmatter.contains("tags: [shared]"))
     }

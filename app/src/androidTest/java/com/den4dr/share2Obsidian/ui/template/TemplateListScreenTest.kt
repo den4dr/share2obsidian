@@ -25,10 +25,10 @@ class TemplateListScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     private val template1 = Template(
-        id = 1L, name = "テスト1", vault = "v", folder = "f", isDefault = false, fields = emptyList()
+        id = 1L, name = "テスト1", isDefault = false, fields = emptyList()
     )
     private val template2 = Template(
-        id = 2L, name = "デフォルトテンプレート", vault = "v", folder = "f", isDefault = true, fields = emptyList()
+        id = 2L, name = "デフォルトテンプレート", isDefault = true, fields = emptyList()
     )
 
     // TC-1: テンプレートリストが表示される
