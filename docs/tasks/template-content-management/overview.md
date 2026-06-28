@@ -37,7 +37,7 @@
 - [x] Phase 2: テンプレート適用ロジック（buildConfig/buildBody）
 - [x] Phase 3: 編集画面 UI（状態拡張 + 表示順変更）
 - [x] Phase 4: テンプレート管理・設定 UI
-- [ ] Phase 5: 統合・最終品質確認（TASK-0053 完了 / TASK-0054 は実機 E2E・リリースビルド残）
+- [x] Phase 5: 統合・最終品質確認（JVM/計器テスト全合格・debug/release ビルド成功）
 
 ## マイルストーン
 
@@ -141,7 +141,7 @@ TASK-0046 → TASK-0052
 ### タスク一覧
 
 - [x] [TASK-0053: MainActivity テンプレート適用・DataStore 統合](TASK-0053.md) - 6h (TDD) 🔵
-- [ ] [TASK-0054: E2E 統合テスト・最終品質確認](TASK-0054.md) - 8h (TDD) 🟡
+- [x] [TASK-0054: E2E 統合テスト・最終品質確認](TASK-0054.md) - 8h (TDD) 🟡
 
 ### 依存関係
 
