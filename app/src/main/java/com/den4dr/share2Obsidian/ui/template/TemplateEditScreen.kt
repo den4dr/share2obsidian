@@ -1,6 +1,7 @@
 package com.den4dr.share2Obsidian.ui.template
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.den4dr.share2Obsidian.R
@@ -244,10 +246,19 @@ private fun FieldAddDialog(
                     FieldValueSource.URL to stringResource(R.string.field_source_url),
                     FieldValueSource.EMPTY to stringResource(R.string.field_source_empty),
                 ).forEach { (source, label) ->
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = valueSource == source,
+                                onClick = { valueSource = source },
+                                role = Role.RadioButton,
+                            ),
+                    ) {
                         RadioButton(
                             selected = valueSource == source,
-                            onClick = { valueSource = source },
+                            onClick = null,
                         )
                         Text(label)
                     }
