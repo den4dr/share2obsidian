@@ -1,3 +1,71 @@
 <resources>
     <string name="app_name">Share2Obsidian</string>
+    <string name="error_obsidian_not_installed">Obsidian がインストールされていません</string>
+    <string name="error_no_file_uri">ファイルの取得に失敗しました</string>
+
+    <!-- 編集・プレビュー機能: フィールドラベル -->
+    <string name="label_title">タイトル</string>
+    <string name="label_body">本文</string>
+    <string name="label_tags">タグ（カンマ区切り）</string>
+    <string name="label_folder">フォルダ</string>
+    <string name="label_vault">Vault</string>
+
+    <!-- EditScreen セクション見出し -->
+    <string name="edit_section_filename">ファイル名</string>
+    <string name="edit_section_frontmatter">Frontmatter</string>
+
+    <!-- 編集・プレビュー機能: ボタン -->
+    <string name="button_send">送信</string>
+    <string name="button_cancel">キャンセル</string>
+
+    <!-- 設定画面 -->
+    <string name="label_settings">設定</string>
+    <string name="settings_placeholder">設定項目はまだ実装されていません</string>
+    <string name="settings_vault_label">デフォルト Vault</string>
+    <string name="settings_folder_label">デフォルトフォルダ</string>
+
+    <!-- テンプレート管理画面 -->
+    <string name="template_list_title">テンプレート管理</string>
+    <string name="template_add_button">テンプレートを追加</string>
+    <string name="template_delete_button">削除</string>
+    <string name="template_edit_button">編集</string>
+    <string name="template_default_badge">デフォルト</string>
+    <string name="template_list_empty">テンプレートがありません</string>
+    <string name="template_delete_confirm_title">テンプレートを削除</string>
+    <string name="template_delete_confirm_message">「%1$s」を削除しますか？</string>
+    <string name="template_delete_confirm_button">削除する</string>
+
+    <!-- テンプレート編集画面 -->
+    <string name="template_edit_title_new">テンプレート作成</string>
+    <string name="template_edit_title_edit">テンプレート編集</string>
+    <string name="template_name_label">テンプレート名</string>
+    <string name="template_body_label">本文テンプレート</string>
+    <string name="template_body_supporting">{{content}} を含めると共有コンテンツがその位置に挿入されます</string>
+    <string name="template_default_label">デフォルトテンプレートに設定</string>
+    <string name="template_save_button">保存</string>
+
+    <!-- フィールド管理 -->
+    <string name="template_fields_header">カスタムフィールド</string>
+    <string name="template_add_field_button">フィールドを追加</string>
+    <string name="field_key_label">フィールドキー名</string>
+    <string name="field_default_value_label">デフォルト値</string>
+    <string name="field_value_source_label">値ソース</string>
+    <string name="field_value_type_label">値タイプ</string>
+    <string name="field_source_fixed">固定値</string>
+    <string name="field_source_html_meta">HTMLメタ</string>
+    <string name="field_source_url">URL</string>
+    <string name="field_source_empty">なし</string>
+    <string name="field_type_string">文字列</string>
+    <string name="field_type_list">リスト</string>
+    <string name="field_html_meta_key_label">HTMLメタキー</string>
+    <string name="html_meta_og_title">OGタイトル</string>
+    <string name="html_meta_og_description">OG説明</string>
+    <string name="html_meta_url">URL</string>
+    <string name="html_meta_published_date">公開日</string>
+    <string name="html_meta_modified_date">更新日</string>
+    <string name="html_meta_author">著者</string>
+    <string name="field_add_button">追加</string>
+
+    <!-- EditScreen カスタムフィールドセクション -->
+    <string name="custom_fields_section_header">カスタムフィールド</string>
 </resources>
