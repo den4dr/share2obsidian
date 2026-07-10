@@ -22,6 +22,9 @@ data class TemplateEditUiState(
     val templateId: Long? = null,
     val name: String = "",
     val body: String = "",
+    // 【本文用LLMプロンプト】: 空文字は「未設定」を表す。updateBodyLlmPrompt()で更新され、save()/loadTemplate()でTemplate.bodyLlmPromptと往復する
+    // 🔵 信頼性レベル: 要件定義書 2.1・TASK-0056で実装済みのTemplate.bodyLlmPromptに対応
+    val bodyLlmPrompt: String = "",
     val isDefault: Boolean = false,
     val fields: List<TemplateFieldEditState> = emptyList(),
     val isSaving: Boolean = false,
@@ -36,6 +39,9 @@ data class TemplateFieldEditState(
     val valueType: FieldValueType = FieldValueType.STRING,
     val defaultValue: String = "",
     val metaKey: HtmlMetaKey? = null,
+    // 【フィールド用LLMプロンプト】: valueSource == LLM の場合のみ使用。空文字は「未設定」
+    // 🔵 信頼性レベル: 要件定義書 2.1・TASK-0056で実装済みのTemplateField.llmPromptに対応
+    val llmPrompt: String = "",
     val sortOrder: Int = 0,
 )
 
@@ -67,6 +73,8 @@ class TemplateEditViewModel @Inject constructor(
                     templateId = template.id,
                     name = template.name,
                     body = template.body,
+                    // 【復元処理】: リポジトリから取得したTemplate.bodyLlmPromptをuiStateに復元する 🔵
+                    bodyLlmPrompt = template.bodyLlmPrompt,
                     isDefault = template.isDefault,
                     fields = template.fields.map { field ->
                         TemplateFieldEditState(
@@ -76,6 +84,8 @@ class TemplateEditViewModel @Inject constructor(
                             valueType = field.valueType,
                             defaultValue = field.defaultValue,
                             metaKey = field.metaKey,
+                            // 【復元処理】: 各フィールドのTemplateField.llmPromptをuiStateに復元する 🔵
+                            llmPrompt = field.llmPrompt,
                             sortOrder = field.sortOrder,
                         )
                     },
@@ -91,6 +101,16 @@ class TemplateEditViewModel @Inject constructor(
 
     fun updateName(name: String) = _uiState.update { it.copy(name = name) }
     fun updateBody(body: String) = _uiState.update { it.copy(body = body) }
+
+    /**
+     * 【機能概要】: 本文用LLMプロンプトの状態を更新する
+     * 【実装方針】: 既存の updateBody() と同じ不変更新パターン（_uiState.update { it.copy(...) }）を踏襲する
+     * 【テスト対応】: TC-N-01（updateBodyLlmPrompt_updatesUiState）を通すための実装
+     * 🔵 信頼性レベル: 要件定義書 2.2・既存 updateBody() 踏襲
+     * @param prompt 本文リライト用のLLMプロンプト文字列（空文字許容）
+     */
+    fun updateBodyLlmPrompt(prompt: String) = _uiState.update { it.copy(bodyLlmPrompt = prompt) }
+
     fun updateIsDefault(isDefault: Boolean) = _uiState.update { it.copy(isDefault = isDefault) }
 
     fun addField(field: TemplateFieldEditState) = _uiState.update {
@@ -115,6 +135,8 @@ class TemplateEditViewModel @Inject constructor(
                 id = state.templateId ?: 0L,
                 name = state.name,
                 body = state.body,
+                // 【保存処理】: uiStateのbodyLlmPromptをTemplate.bodyLlmPromptに反映する 🔵
+                bodyLlmPrompt = state.bodyLlmPrompt,
                 isDefault = state.isDefault,
                 fields = state.fields.mapIndexed { index, field ->
                     TemplateField(
@@ -125,6 +147,8 @@ class TemplateEditViewModel @Inject constructor(
                         valueType = field.valueType,
                         defaultValue = field.defaultValue,
                         metaKey = field.metaKey,
+                        // 【保存処理】: 各フィールドのllmPromptをTemplateField.llmPromptに反映する 🔵
+                        llmPrompt = field.llmPrompt,
                         sortOrder = index,
                     )
                 },

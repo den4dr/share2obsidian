@@ -2,9 +2,12 @@ package com.den4dr.share2Obsidian.ui
 
 import com.den4dr.share2Obsidian.content.ContentKind
 import com.den4dr.share2Obsidian.content.ProcessedContent
+import com.den4dr.share2Obsidian.data.llm.LlmRewriteRepository
+import com.den4dr.share2Obsidian.data.llm.LlmSettingsRepository
 import com.den4dr.share2Obsidian.domain.model.CustomFieldState
 import com.den4dr.share2Obsidian.domain.model.FieldValueType
 import com.den4dr.share2Obsidian.format.NoteConfig
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -34,6 +37,19 @@ class EditScreenViewModelTest {
     // ----------------------------------------------------------------
     // テスト共通設定
     // ----------------------------------------------------------------
+
+    // 【TASK-0063 追加】: EditScreenViewModel が @Inject constructor(llmRewriteRepository, llmSettingsRepository)
+    // を要求するようになったため、本テストでは呼び出されない MockK スタブを渡してインスタンス化する 🔵
+    private val mockRewrite = mockk<LlmRewriteRepository>()
+    private val mockSettings = mockk<LlmSettingsRepository>()
+
+    /**
+     * 【テストヘルパー】: 本テストクラスで検証する initialize()/updateXxx()/buildSendParams() は
+     *   LLM リポジトリを一切使用しないため、呼び出されない MockK スタブを渡すだけの
+     *   EditScreenViewModel を生成する 🔵
+     * 【再利用性】: 全テストケースで共通のコンストラクタ呼び出しを1箇所に集約する
+     */
+    private fun newViewModel() = EditScreenViewModel(mockRewrite, mockSettings)
 
     /** 【テスト前準備】: 各テストで共通に使用する標準的な入力データを定義 */
     private lateinit var standardProcessed: ProcessedContent
@@ -71,7 +87,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-003 の初期値マッピング仕様（title, body, tagsText, folder）に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act
         // 【実際の処理実行】: ViewModel の初期化メソッドを呼び出す
@@ -120,7 +136,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: EDGE-101「画面回転後も状態が保持される」要件に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act
         // 【実際の処理実行】: 初回初期化 → 状態変更 → 2回目初期化の順で操作
@@ -157,7 +173,7 @@ class EditScreenViewModelTest {
             title = null,
             contentType = ContentKind.TEXT
         )
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act
         // 【実際の処理実行】: title = null の ProcessedContent で初期化
@@ -191,7 +207,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-003・note.md の状態更新パターン `_formState.value.copy(title = title)` に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
 
         // Act
@@ -235,7 +251,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-003・note.md の update メソッド仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
 
         // Act
@@ -272,7 +288,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-103・note.md の update メソッド仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
 
         // Act
@@ -309,7 +325,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-405・note.md の update メソッド仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
 
         // Act
@@ -346,7 +362,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: REQ-103・TC-101-02/03 のタグパース仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
         viewModel.updateTagsText("shared, web")
 
@@ -392,7 +408,7 @@ class EditScreenViewModelTest {
             folder = "inbox",
             defaultTags = listOf("test")
         )
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, customConfig)
 
         // Act
@@ -428,7 +444,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: EDGE-001・note.md の `state.title.ifBlank { null }` 実装仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
         // 【初期条件設定】: ユーザーがタイトルフィールドを全削除した状態をシミュレート
         viewModel.updateTitle("")
@@ -458,7 +474,7 @@ class EditScreenViewModelTest {
         // 🟡 信頼性レベル: EDGE-001 から妥当な推測（ifBlank の動作仕様）
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
         // 【初期条件設定】: ユーザーが誤ってスペースのみ入力した状態をシミュレート
         viewModel.updateTitle("   ")
@@ -488,7 +504,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: EDGE-002「本文空で送信」・requirements.md の変換ロジック表に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
         // 【初期条件設定】: ユーザーが本文を全削除した状態をシミュレート
         viewModel.updateBody("")
@@ -517,7 +533,7 @@ class EditScreenViewModelTest {
         // 🔵 信頼性レベル: EDGE-003・TASK-0016 の parseTagsText 実装仕様に基づく
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
         // 【初期条件設定】: ユーザーがタグフィールドを全削除した状態をシミュレート
         viewModel.updateTagsText("")
@@ -556,7 +572,7 @@ class EditScreenViewModelTest {
             folder = "70_clippings",
             defaultTags = listOf("shared", "web")
         )
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act
         viewModel.initialize(standardProcessed, multiTagConfig)
@@ -587,7 +603,7 @@ class EditScreenViewModelTest {
             folder = "70_clippings",
             defaultTags = emptyList()
         )
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act
         viewModel.initialize(standardProcessed, emptyTagConfig)
@@ -613,7 +629,7 @@ class EditScreenViewModelTest {
 
         // Arrange
         // 【初期条件設定】: initialize() を一切呼ばずに ViewModel を作成
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
 
         // Act & Assert
         // 【実際の処理実行】: formState.value に直接アクセスして初期値を確認
@@ -646,7 +662,7 @@ class EditScreenViewModelTest {
         // 🟡 信頼性レベル: data class の copy() と StateFlow の動作から妥当な推測
 
         // Arrange
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         viewModel.initialize(standardProcessed, standardConfig)
 
         // Act
@@ -684,7 +700,7 @@ class EditScreenViewModelTest {
     // TC-CUSTOM-001: initialize() で customFields が FormState に設定される
     @Test
     fun `TC-CUSTOM-001 initialize で customFields が formState に設定される`() {
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         val customFields = listOf(
             CustomFieldState("source", "https://example.com", FieldValueType.STRING)
         )
@@ -695,7 +711,7 @@ class EditScreenViewModelTest {
     // TC-CUSTOM-002: buildSendParams() が customFields を含む SendParams を返す
     @Test
     fun `TC-CUSTOM-002 buildSendParams が customFields を含む SendParams を返す`() {
-        val viewModel = EditScreenViewModel()
+        val viewModel = newViewModel()
         val customFields = listOf(
             CustomFieldState("source", "https://example.com", FieldValueType.STRING)
         )

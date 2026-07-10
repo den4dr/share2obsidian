@@ -32,16 +32,34 @@ object TemplateApplicator {
         else templateBody.replace("{{content}}", sharedBody)
     }
 
+    /**
+     * 【機能概要】: テンプレートのカスタムフィールド定義（TemplateField）を、EditScreenの編集状態
+     * （CustomFieldState）へ変換する
+     * 【実装方針】: FIXED/HTML_META/URL/EMPTY の既存 value 算出ロジックは変更せず、CustomFieldState
+     * 生成時に valueSource/llmPrompt を新たに渡すことで、LLM生成ボタンの表示判定に必要な情報を橋渡しする
+     * 【テスト対応】: TC-0070-N01〜N03, E01〜E02, B01〜B03（テンプレート適用時のLLM対応・回帰確認）
+     * 🔵 信頼性レベル: 要件定義書 2-2 値算出テーブル・REQ-304 に基づく（推測なし）
+     * @param template カスタムフィールド定義を持つテンプレート（null可）
+     * @param processed 共有コンテンツの処理結果
+     * @return 各 TemplateField を変換した編集状態のリスト（template が null の場合は空リスト）
+     */
     fun buildCustomFields(
         template: Template?,
         processed: ProcessedContent,
     ): List<CustomFieldState> = template?.fields?.map { field ->
+        // 【値算出】: valueSource ごとに value を算出する（既存ロジックを維持） 🔵
         val value = when (field.valueSource) {
             FieldValueSource.FIXED -> field.defaultValue
             FieldValueSource.HTML_META -> processed.metadata[field.metaKey] ?: ""
             FieldValueSource.URL -> processed.sourceUrl ?: ""
             FieldValueSource.EMPTY -> ""
+            // 【LLM生成は本関数では行わない】: テンプレート適用時点ではLLM呼び出しを行わず、値は空文字のまま
+            // EditScreen上のボタン押下時（TASK-0072/0073）に生成する（REQ-304の設計判断）
+            // 🔵 信頼性レベル: 要件定義書 制約条件・design-interview.md Q2 に基づく（推測なし）
+            FieldValueSource.LLM -> ""
         }
-        CustomFieldState(field.key, value, field.valueType)
+        // 【CustomFieldState生成】: valueSource/llmPrompt を渡すことで、EditScreen側でLLM生成ボタンの
+        // 表示・活性判定が可能になる 🔵
+        CustomFieldState(field.key, value, field.valueType, field.valueSource, field.llmPrompt)
     } ?: emptyList()
 }

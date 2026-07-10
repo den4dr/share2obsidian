@@ -34,6 +34,18 @@ data class EditFormState(
     val folder: String,
     // 【フィールド定義】: テンプレートから適用されたカスタムフィールド一覧（REQ-052）🔵
     val customFields: List<com.den4dr.share2Obsidian.domain.model.CustomFieldState> = emptyList(),
+    // 【フィールド定義】: rewriteBody() 実行中のローディング状態（REQ-201）。UI はこれを購読してスピナー表示を制御する 🔵
+    val isRewritingBody: Boolean = false,
+    // 【フィールド定義】: 「メモを更改」ボタンの活性判定(REQ-102)。initialize() 時に bodyLlmPrompt.isNotBlank() から算出される 🔵
+    val rewriteBodyEnabled: Boolean = false,
+    // 【フィールド定義】: suggestTags() 実行中のローディング状態（REQ-201）。isRewritingBody と同様、UI はこれを購読してスピナー表示・ボタン非活性化を制御する 🔵
+    // 【テスト対応】: TC-0068-B01
+    val isSuggestingTags: Boolean = false,
+    // 【フィールド定義】: generateCustomFieldValue(index) 実行中のローディング対象インデックス（REQ-104/REQ-304）。
+    //              null は非生成中、非nullはそのインデックスのカスタムフィールドが生成中であることを示す。
+    //              isRewritingBody/isSuggestingTags と異なりフィールド単位のため Boolean ではなく Int? で保持する 🟡
+    // 【テスト対応】: TC-0072-N04
+    val generatingFieldIndex: Int? = null,
 )
 
 /**

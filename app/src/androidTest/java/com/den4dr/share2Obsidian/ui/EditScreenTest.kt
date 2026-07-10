@@ -15,7 +15,16 @@ import com.den4dr.share2Obsidian.content.ContentKind
 import com.den4dr.share2Obsidian.content.ProcessedContent
 import com.den4dr.share2Obsidian.domain.model.CustomFieldState
 import com.den4dr.share2Obsidian.domain.model.FieldValueType
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import com.den4dr.share2Obsidian.format.NoteConfig
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.verify
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -54,7 +63,7 @@ class EditScreenTest {
         body: String = "テスト本文",
     ): EditScreenViewModel {
         // 【テストデータ準備】: ProcessedContent でコンテンツ種別を TEXT、title/body を指定して初期化する
-        val viewModel = EditScreenViewModel()
+        val viewModel = EditScreenViewModel(mockk(relaxed = true), mockk(relaxed = true))
         val processed = ProcessedContent(
             body = body,
             title = title,
@@ -586,7 +595,7 @@ class EditScreenTest {
     // TC-CUSTOM-UI-002: customFields があるとき、キーと値が表示される
     @Test
     fun `TC-CUSTOM-UI-002 customFields があるとき キーと値が表示される`() {
-        val viewModel = EditScreenViewModel()
+        val viewModel = EditScreenViewModel(mockk(relaxed = true), mockk(relaxed = true))
         val processed = ProcessedContent(body = "本文", contentType = ContentKind.TEXT)
         val customFields = listOf(CustomFieldState("source", "https://example.com", FieldValueType.STRING))
         viewModel.initialize(processed, testConfig, customFields)
@@ -605,7 +614,7 @@ class EditScreenTest {
     // TC-CUSTOM-UI-003: カスタムフィールドの値を編集すると ViewModel に反映される
     @Test
     fun `TC-CUSTOM-UI-003 カスタムフィールドの値編集が ViewModel に反映される`() {
-        val viewModel = EditScreenViewModel()
+        val viewModel = EditScreenViewModel(mockk(relaxed = true), mockk(relaxed = true))
         val processed = ProcessedContent(body = "本文", contentType = ContentKind.TEXT)
         val customFields = listOf(CustomFieldState("source", "", FieldValueType.STRING))
         viewModel.initialize(processed, testConfig, customFields)
@@ -619,5 +628,291 @@ class EditScreenTest {
         }
         composeTestRule.onNodeWithText("source").performTextInput("new-value")
         assertEquals("new-value", viewModel.formState.value.customFields[0].value)
+    }
+
+    // =========================================================================
+    // TASK-0065: 「メモを更改」ボタン・ローディング・エラーToast
+    // =========================================================================
+
+    /**
+     * 【共通ヘルパー】: 指定した状態を持つ EditScreenViewModel モックを生成する
+     * 【役割】: rewriteBody() 呼び出し・formState・errorEvents をスタブし、UI単体の挙動のみを検証する
+     * 🔵 信頼性レベル: editscreen-rewrite-button-testcases.md §0.4 より
+     */
+    private fun mockViewModel(
+        rewriteBodyEnabled: Boolean = true,
+        isRewritingBody: Boolean = false,
+        isSuggestingTags: Boolean = false, // TASK-0069 で追加
+        body: String = "テスト本文",
+        tagsText: String = "shared",
+        errorEvents: MutableSharedFlow<Int> = MutableSharedFlow(extraBufferCapacity = 1),
+    ): EditScreenViewModel {
+        val vm = mockk<EditScreenViewModel>(relaxed = true)
+        every { vm.formState } returns MutableStateFlow(
+            EditFormState(
+                vault = "testVault",
+                title = "テストタイトル",
+                body = body,
+                tagsText = tagsText,
+                folder = "70_clippings",
+                isRewritingBody = isRewritingBody,
+                rewriteBodyEnabled = rewriteBodyEnabled,
+                isSuggestingTags = isSuggestingTags, // TASK-0069 で追加
+            )
+        )
+        every { vm.errorEvents } returns errorEvents
+        every { vm.rewriteBody() } just Runs
+        every { vm.suggestTags() } just Runs // TASK-0069 で追加
+        return vm
+    }
+
+    // =========================================================================
+    // TASK-0069: 「タグを提案」ボタン・ローディング・活性制御・errorEvents 再利用確認
+    // =========================================================================
+
+    // TC-11: isSuggestingTags=false のとき「タグを提案」ボタンが表示され活性である
+    @Test
+    fun `TC-11 isSuggestingTagsがfalse のとき タグを提案ボタンが表示され活性である`() {
+        // 【テスト目的】: isSuggestingTags == false のとき、testTag "suggest_tags_button" のボタンが
+        //              表示され、活性状態で、ラベル「タグを提案」が表示されることを確認する
+        // 【テスト内容】: mockViewModel(isSuggestingTags = false) で EditScreen を描画する
+        // 【期待される動作】: ボタンが assertIsDisplayed() かつ assertIsEnabled()、
+        //                  ボタン内に「タグを提案」テキストが表示される
+        // 🔵 信頼性レベル: REQ-103・AC-1・editscreen-suggest-tags-button-testcases.md TC-11 より
+
+        // 【テストデータ準備】: 共有テキストを開いた通常の待機状態を代表する isSuggestingTags=false を用意する
+        // 【初期条件設定】: EditScreen 未実装（「タグを提案」ボタン未追加）のため、以下は失敗する想定
+        val viewModel = mockViewModel(isSuggestingTags = false)
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【実際の処理実行】: testTag "suggest_tags_button" のノードを検索する
+        // 【結果検証】: ボタンの表示・活性・ラベルを確認する
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertIsDisplayed() // 【確認内容】: 「タグを提案」ボタンが表示されている（REQ-103）🔵
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertIsEnabled() // 【確認内容】: 通常時はボタンが活性状態である 🔵
+        composeTestRule.onNodeWithText("タグを提案").assertIsDisplayed() // 【確認内容】: stringResource(button_suggest_tags) 由来のラベルが表示される（NFR-201）🔵
+    }
+
+    // TC-12: ボタン押下で viewModel.suggestTags() が1回呼ばれる
+    @Test
+    fun `TC-12 活性状態でボタンを押下すると suggestTags が1回呼ばれる`() {
+        // 【テスト目的】: 活性状態のボタンを performClick() した際に viewModel.suggestTags() が
+        //              正確に1回呼び出されることを確認する
+        // 【テスト内容】: mockViewModel(isSuggestingTags = false) で描画後、ボタンを押下する
+        // 【期待される動作】: onClick ハンドラが viewModel.suggestTags() を1回起動する
+        // 🔵 信頼性レベル: TASK-0069.md 単体テスト要件 テストケース1・完了条件・AC-2 より
+
+        // 【テストデータ準備】: ユーザーがタグ提案を起動する中核ユースケースを代表する
+        val viewModel = mockViewModel(isSuggestingTags = false)
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【実際の処理実行】: 「タグを提案」ボタンを performClick() で押下する
+        // 【処理内容】: onClick = { viewModel.suggestTags() } が実行される想定
+        composeTestRule.onNodeWithTag("suggest_tags_button").performClick()
+
+        // 【結果検証】: suggestTags() がちょうど1回呼ばれたことを検証する
+        verify(exactly = 1) { viewModel.suggestTags() } // 【確認内容】: ボタン押下でタグ提案が1回起動される（多重起動しない）🔵
+    }
+
+    // TC-13: isSuggestingTags=true のときローディング表示かつ非活性
+    @Test
+    fun `TC-13 isSuggestingTagsがtrue のときローディング表示かつボタンが非活性である`() {
+        // 【テスト目的】: 処理中（isSuggestingTags == true）はボタン内にローディングインジケータが
+        //              表示され、ボタンが非活性であることを確認する
+        // 【テスト内容】: mockViewModel(isSuggestingTags = true) で描画する
+        // 【期待される動作】: testTag "suggest_tags_progress" のノードが表示され、
+        //                  ボタンは assertIsNotEnabled()、通常ラベルは表示されない
+        // 🔵 信頼性レベル: TASK-0069.md 単体テスト要件 テストケース2・AC-3・REQ-201, NFR-202 より
+
+        // 【テストデータ準備】: ボタン押下後、LLM応答待ちの処理中状態（最大30秒、REQ-202）を代表する
+        val viewModel = mockViewModel(isSuggestingTags = true)
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【結果検証】: ローディング表示・非活性・ラベル非表示を確認する
+        composeTestRule.onNodeWithTag("suggest_tags_progress").assertIsDisplayed() // 【確認内容】: 処理中は CircularProgressIndicator 相当ノードが表示される 🔵
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertIsNotEnabled() // 【確認内容】: 処理中はボタンが非活性で多重押下を防止する 🔵
+        composeTestRule.onNodeWithText("タグを提案").assertDoesNotExist() // 【確認内容】: 処理中は通常ラベル「タグを提案」が表示されない 🔵
+    }
+
+    // TC-14: errorEvents 発行時に購読が機能し画面がクラッシュしない
+    @Test
+    fun `TC-14 errorEvents emit時にタグ提案ボタン関連の購読が機能し画面がクラッシュしない`() {
+        // 【テスト目的】: suggestTags() 失敗時に errorEvents へ emit されても、
+        //              既存 LaunchedEffect+collectLatest による購読がクラッシュを起こさないことを確認する
+        // 【テスト内容】: errorEvents に R.string.error_llm_network を tryEmit() する
+        // 【期待される動作】: emit 後も EditScreen がクラッシュせず、「タグを提案」ボタンが存続する
+        // 🟡 信頼性レベル: editscreen-suggest-tags-button-requirements.md §4「エラーケース」・NFR-201 より
+
+        // 【テストデータ準備】: タグ提案がネットワークエラー等で失敗したケースを代表する
+        val errorEvents = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+        val viewModel = mockViewModel(errorEvents = errorEvents)
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【実際の処理実行】: errorEvents に resId を emit する
+        composeTestRule.runOnUiThread {
+            errorEvents.tryEmit(com.den4dr.share2Obsidian.R.string.error_llm_network)
+        }
+        composeTestRule.waitForIdle()
+
+        // 【結果検証】: emit 後もボタンノードが存続し画面がクラッシュしていないことを確認する
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertExists() // 【確認内容】: errorEvents 購読機構が suggestTags() 失敗経路でもUIを破壊しない 🟡
+    }
+
+    // BC-11: 活性は isSuggestingTags のみに依存する（rewriteBodyEnabled の影響を受けない）
+    @Test
+    fun `BC-11 rewriteBodyEnabledがfalseでもisSuggestingTagsがfalseならタグ提案ボタンは活性`() {
+        // 【テスト目的】: タグ提案ボタンの活性式が isSuggestingTags のみに依存し、
+        //              rewriteBodyEnabled 等の他フラグに影響されないことを確認する
+        // 【テスト内容】: mockViewModel(rewriteBodyEnabled = false, isSuggestingTags = false) で描画する
+        // 【期待される動作】: rewriteBodyEnabled=false（本文リライトボタンは非活性）でも
+        //                  タグ提案ボタンは活性のままである
+        // 🔵 信頼性レベル: editscreen-suggest-tags-button-requirements.md §3「ボタン活性化制約」・TASK-0069.md 実装詳細2 より
+
+        // 【境界値選択の根拠】: 本文リライトボタンが非活性になる条件でも、タグ提案ボタンは
+        //                    活性ガードの混入（誤って rewriteBodyEnabled を参照する回帰）を検出する
+        val viewModel = mockViewModel(rewriteBodyEnabled = false, isSuggestingTags = false)
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【結果検証】: rewriteBodyEnabled の値に関わらずタグ提案ボタンが活性であることを確認する
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertIsEnabled() // 【確認内容】: 活性判定が isSuggestingTags のみに依存する（rewriteBodyEnabled ガード混入なし）🔵
+    }
+
+    // BC-12: EDGE-101 元コンテンツ（本文）が空文字でもボタンは活性のまま
+    @Test
+    fun `BC-12 元コンテンツ本文が空文字でもタグ提案ボタンは非活性化しない`() {
+        // 【テスト目的】: 元コンテンツ（本文）が空文字という境界入力でも、
+        //              タグ提案ボタンの活性判定が isSuggestingTags のみに依存し、
+        //              本文の空/非空に影響されないことを確認する（EDGE-101）
+        // 【テスト内容】: mockViewModel(isSuggestingTags = false, body = "") で描画する
+        // 【期待される動作】: 空 body でもタグ提案ボタンは活性のままである
+        // 🔵 信頼性レベル: EDGE-101・editscreen-suggest-tags-button-requirements.md §4「エッジケース」より
+
+        // 【境界値選択の根拠】: 空文字は最小の入力境界。本文を全消去した状態でもタグ提案の起動を許容する
+        val viewModel = mockViewModel(isSuggestingTags = false, body = "")
+
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+
+        // 【結果検証】: 空 body でもタグ提案ボタンが活性であることを確認する
+        composeTestRule.onNodeWithTag("suggest_tags_button").assertIsEnabled() // 【確認内容】: body の空/非空が活性判定に影響しない（EDGE-101）🔵
+    }
+
+    // TC-01: 活性状態のとき「メモを更改」ボタンが表示され活性である
+    @Test
+    fun `TC-01 活性状態のとき メモを更改 ボタンが表示され活性である`() {
+        // 【テスト目的】: rewriteBodyEnabled=true かつ isRewritingBody=false のときボタンが表示・活性・ラベル表示されることを確認する
+        // 🔵 信頼性レベル: REQ-001・strings.xml button_rewrite_body より
+        val viewModel = mockViewModel(rewriteBodyEnabled = true, isRewritingBody = false)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsEnabled()
+        composeTestRule.onNodeWithText("メモを更改").assertIsDisplayed()
+    }
+
+    // TC-02: ボタン押下で viewModel.rewriteBody() が1回呼ばれる
+    @Test
+    fun `TC-02 ボタン押下で rewriteBody が1回呼ばれる`() {
+        // 【テスト目的】: 活性状態のボタン押下が viewModel_rewriteBody() の呼び出しに正しく結線されていることを確認する
+        // 🔵 信頼性レベル: TASK-0065.md テストケース2・REQ-001 より
+        val viewModel = mockViewModel(rewriteBodyEnabled = true, isRewritingBody = false)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").performClick()
+        verify(exactly = 1) { viewModel.rewriteBody() }
+    }
+
+    // TC-03: rewriteBodyEnabled=false のときボタンが非活性
+    @Test
+    fun `TC-03 rewriteBodyEnabled が false のときボタンが非活性`() {
+        // 【テスト目的】: プロンプト未設定時にボタンが非活性となることを確認する（REQ-102）
+        // 🔵 信頼性レベル: TASK-0065.md テストケース1・REQ-102 より
+        val viewModel = mockViewModel(rewriteBodyEnabled = false, isRewritingBody = false)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsNotEnabled()
+    }
+
+    // TC-04: isRewritingBody=true のときローディング表示かつ非活性
+    @Test
+    fun `TC-04 isRewritingBody が true のときローディング表示かつ非活性`() {
+        // 【テスト目的】: 処理中はローディングインジケータが表示され、ボタンが非活性となることを確認する（REQ-201, NFR-202）
+        // 🔵 信頼性レベル: TASK-0065.md テストケース3・REQ-201, NFR-202 より
+        val viewModel = mockViewModel(rewriteBodyEnabled = true, isRewritingBody = true)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_progress").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsNotEnabled()
+        composeTestRule.onNodeWithText("メモを更改").assertDoesNotExist()
+    }
+
+    // TC-05: errorEvents emit で購読が機能し画面がクラッシュしない
+    @Test
+    fun `TC-05 errorEvents emit 時に購読が機能し画面がクラッシュしない`() {
+        // 【テスト目的】: LLMリライト失敗時の errorEvents 購読がクラッシュを起こさないことを確認する（NFR-201）
+        // 🟡 信頼性レベル: 要件定義書 TC-4（任意）・NFR-201 より。Toast文言の直接アサートは環境依存のため補助扱い
+        val errorEvents = MutableSharedFlow<Int>(extraBufferCapacity = 1)
+        val viewModel = mockViewModel(errorEvents = errorEvents)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.runOnUiThread {
+            errorEvents.tryEmit(com.den4dr.share2Obsidian.R.string.error_llm_network)
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertExists()
+    }
+
+    // BC-01: (enabled=true, rewriting=false) のときのみ活性
+    @Test
+    fun `BC-01 enabledがtrue かつ rewritingがfalse のとき活性`() {
+        // 🔵 信頼性レベル: TASK-0065.md 実装詳細1 の活性式より
+        val viewModel = mockViewModel(rewriteBodyEnabled = true, isRewritingBody = false)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsEnabled()
+    }
+
+    // BC-02: (enabled=false, rewriting=true) のとき非活性
+    @Test
+    fun `BC-02 enabledがfalse かつ rewritingがtrue のとき非活性`() {
+        // 🟡 信頼性レベル: 活性式から導出した真理値表網羅のための補完
+        val viewModel = mockViewModel(rewriteBodyEnabled = false, isRewritingBody = true)
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsNotEnabled()
+    }
+
+    // BC-03: 空 body でも rewriteBodyEnabled のみに活性が依存する
+    @Test
+    fun `BC-03 空bodyでも活性は rewriteBodyEnabled のみに依存する`() {
+        // 🔵 信頼性レベル: 要件定義書 BC-1・EDGE-101 より
+        val viewModel = mockViewModel(rewriteBodyEnabled = true, isRewritingBody = false, body = "")
+        composeTestRule.setContent {
+            EditScreen(viewModel = viewModel, onSend = {}, onCancel = {}, onNavigateToSettings = {})
+        }
+        composeTestRule.onNodeWithTag("rewrite_body_button").assertIsEnabled()
     }
 }

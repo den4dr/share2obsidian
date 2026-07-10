@@ -122,6 +122,20 @@ fun TemplateEditScreen(
                     .testTag("template_body_field"),
                 minLines = 4,
             )
+            Spacer(Modifier.height(8.dp))
+
+            // 【本文用LLMプロンプト入力欄】: template_body_field と同様の複数行入力欄。空文字は「未設定」を表す
+            // 【テスト対応】: TC-N-05（bodyLlmPromptInput_updatesViewModel）、TC-N-06（往復復元）を通すための実装
+            // 🔵 信頼性レベル: 要件定義書 2.3・note.md UI/UX要件
+            OutlinedTextField(
+                value = uiState.bodyLlmPrompt,
+                onValueChange = { viewModel.updateBodyLlmPrompt(it) },
+                label = { Text(stringResource(R.string.template_body_llm_prompt_label)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("template_body_llm_prompt_field"),
+                minLines = 2,
+            )
             Spacer(Modifier.height(16.dp))
 
             Row(
@@ -224,6 +238,9 @@ private fun FieldAddDialog(
     var defaultValue by remember { mutableStateOf("") }
     var metaKey by remember { mutableStateOf(HtmlMetaKey.OG_TITLE) }
     var metaKeyExpanded by remember { mutableStateOf(false) }
+    // 【LLMプロンプト入力状態】: valueSource == LLM のときのみ表示・使用する入力欄の一時状態
+    // 🔵 信頼性レベル: 要件定義書 2.3・TASK-0071実装詳細7
+    var llmPromptInput by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -240,12 +257,35 @@ private fun FieldAddDialog(
                 Spacer(Modifier.height(12.dp))
 
                 Text(stringResource(R.string.field_value_source_label))
-                listOf(
-                    FieldValueSource.FIXED to stringResource(R.string.field_source_fixed),
-                    FieldValueSource.HTML_META to stringResource(R.string.field_source_html_meta),
-                    FieldValueSource.URL to stringResource(R.string.field_source_url),
-                    FieldValueSource.EMPTY to stringResource(R.string.field_source_empty),
-                ).forEach { (source, label) ->
+                // 【改善内容】: valueSource選択肢リストをremember化し、key入力等によるダイアログの再コンポーズのたびに
+                // リストオブジェクトとラベル解決が再実行されるのを防ぐ
+                // 【設計方針】: stringResource()はComposable専用関数のためremember{}の外側で解決し、
+                // 結果のPairリストのみをremember対象にする（remember内でComposable呼び出しは不可のため）
+                // 【パフォーマンス】: 5件程度の小さなリストではあるが、テキスト入力のたびに走る処理から
+                // 不要な再割り当てを排除する意図で分離した
+                // 🔵 信頼性レベル: 既存ロジック・並び順は変更せず、生成タイミングのみ最適化（要件への影響なし）
+                val fieldSourceFixedLabel = stringResource(R.string.field_source_fixed)
+                val fieldSourceHtmlMetaLabel = stringResource(R.string.field_source_html_meta)
+                val fieldSourceUrlLabel = stringResource(R.string.field_source_url)
+                val fieldSourceEmptyLabel = stringResource(R.string.field_source_empty)
+                // 【LLM生成の値取得方法選択肢】: REQ-303に基づき追加 🔵
+                val fieldSourceLlmLabel = stringResource(R.string.field_source_llm)
+                val fieldSourceOptions = remember(
+                    fieldSourceFixedLabel,
+                    fieldSourceHtmlMetaLabel,
+                    fieldSourceUrlLabel,
+                    fieldSourceEmptyLabel,
+                    fieldSourceLlmLabel,
+                ) {
+                    listOf(
+                        FieldValueSource.FIXED to fieldSourceFixedLabel,
+                        FieldValueSource.HTML_META to fieldSourceHtmlMetaLabel,
+                        FieldValueSource.URL to fieldSourceUrlLabel,
+                        FieldValueSource.EMPTY to fieldSourceEmptyLabel,
+                        FieldValueSource.LLM to fieldSourceLlmLabel,
+                    )
+                }
+                fieldSourceOptions.forEach { (source, label) ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -272,6 +312,22 @@ private fun FieldAddDialog(
                         label = { Text(stringResource(R.string.field_default_value_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
+                    )
+                }
+
+                if (valueSource == FieldValueSource.LLM) {
+                    // 【LLMプロンプト入力欄】: valueSource == LLM のときのみ表示する（受け入れ基準 TC-104-01）
+                    // 【テスト対応】: TC-N-04（llmSource_showsLlmPromptField）を通すための実装
+                    // 🔵 信頼性レベル: 要件定義書 2.3・TASK-0071実装詳細7
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = llmPromptInput,
+                        onValueChange = { llmPromptInput = it },
+                        label = { Text(stringResource(R.string.field_llm_prompt_label)) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("field_llm_prompt_field"),
+                        minLines = 2,
                     )
                 }
 
@@ -336,6 +392,9 @@ private fun FieldAddDialog(
                                 valueType = valueType,
                                 defaultValue = if (valueSource == FieldValueSource.FIXED) defaultValue else "",
                                 metaKey = if (valueSource == FieldValueSource.HTML_META) metaKey else null,
+                                // 【非LLM選択時のプロンプト破棄】: valueSource != LLM の場合は空文字にする（TC-E-02）
+                                // 🟡 信頼性レベル: 要件定義書 4.3 EDGE（実装詳細7の分岐からの妥当推測）
+                                llmPrompt = if (valueSource == FieldValueSource.LLM) llmPromptInput else "",
                             )
                         )
                     }

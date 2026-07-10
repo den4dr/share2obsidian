@@ -24,6 +24,11 @@
     <string name="settings_vault_label">デフォルト Vault</string>
     <string name="settings_folder_label">デフォルトフォルダ</string>
 
+    <!-- 設定画面: LLM API設定（TASK-0067） -->
+    <string name="settings_llm_endpoint_label">LLM エンドポイント</string>
+    <string name="settings_llm_apikey_label">APIキー</string>
+    <string name="settings_llm_model_label">モデル名</string>
+
     <!-- テンプレート管理画面 -->
     <string name="template_list_title">テンプレート管理</string>
     <string name="template_add_button">テンプレートを追加</string>
@@ -41,6 +46,8 @@
     <string name="template_name_label">テンプレート名</string>
     <string name="template_body_label">本文テンプレート</string>
     <string name="template_body_supporting">{{content}} を含めると共有コンテンツがその位置に挿入されます</string>
+    <!-- TASK-0071: 本文用LLMプロンプト入力欄ラベル 🔵 -->
+    <string name="template_body_llm_prompt_label">本文用LLMプロンプト</string>
     <string name="template_default_label">デフォルトテンプレートに設定</string>
     <string name="template_save_button">保存</string>
 
@@ -55,6 +62,9 @@
     <string name="field_source_html_meta">HTMLメタ</string>
     <string name="field_source_url">URL</string>
     <string name="field_source_empty">なし</string>
+    <!-- TASK-0071: LLM生成の値取得方法ラベル・プロンプト入力欄ラベル 🔵 -->
+    <string name="field_source_llm">LLM生成</string>
+    <string name="field_llm_prompt_label">LLMプロンプト</string>
     <string name="field_type_string">文字列</string>
     <string name="field_type_list">リスト</string>
     <string name="field_html_meta_key_label">HTMLメタキー</string>
@@ -68,4 +78,23 @@
 
     <!-- EditScreen カスタムフィールドセクション -->
     <string name="custom_fields_section_header">カスタムフィールド</string>
+
+    <!-- LLM書き換え機能: ボタンラベル -->
+    <string name="button_rewrite_body">メモを更改</string>
+    <!-- LLMタグ提案機能: ボタンラベル（TASK-0069） -->
+    <string name="button_suggest_tags">タグを提案</string>
+
+    <!-- LLMタグ提案機能: アプリ内固定プロンプト（TASK-0068）。EditScreenViewModel.TAG_SUGGESTION_PROMPT と同一内容 -->
+    <string name="llm_tag_suggestion_prompt">以下の文章から関連するタグを3〜5個、カンマ区切りで提案してください</string>
+
+    <!-- LLM書き換え機能: エラーメッセージ -->
+    <string name="error_llm_network">ネットワークに接続できませんでした</string>
+    <string name="error_llm_auth">LLM APIの認証に失敗しました。APIキーを確認してください</string>
+    <string name="error_llm_timeout">LLM APIの応答がタイムアウトしました</string>
+    <string name="error_llm_empty_response">LLM APIから有効な応答が得られませんでした</string>
+    <string name="error_llm_unknown">LLM APIの呼び出し中に不明なエラーが発生しました</string>
+
+    <!-- カスタムフィールドLLM生成機能（TASK-0072） -->
+    <string name="field_generate_button">生成</string>
+    <string name="field_generating">生成中...</string>
 </resources>

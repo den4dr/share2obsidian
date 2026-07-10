@@ -21,7 +21,9 @@ object DatabaseModule {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase =
         Room.databaseBuilder(context, AppDatabase::class.java, "share2obsidian.db")
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            // 【マイグレーション登録】: バージョン昇順で登録する（登録漏れは Room が IllegalStateException を投げる）
+            // 🔵 信頼性レベル: TASK-0057 要件定義・制約条件（マイグレーション登録順序制約）に基づく
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .build()
 
     @Provides

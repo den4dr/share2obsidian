@@ -3,10 +3,13 @@ package com.den4dr.share2Obsidian
 import android.content.Intent
 import android.net.Uri
 import android.os.Looper
+import com.den4dr.share2Obsidian.data.llm.LlmRewriteRepository
+import com.den4dr.share2Obsidian.data.llm.LlmSettingsRepository
 import com.den4dr.share2Obsidian.format.NoteComposer
 import com.den4dr.share2Obsidian.format.NoteConfig
 import com.den4dr.share2Obsidian.ui.EditScreenViewModel
 import com.den4dr.share2Obsidian.ui.SendParams
+import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -575,7 +578,9 @@ class MainActivityEditFlowTest {
 
         // Arrange: EditScreenViewModel を直接インスタンス化する
         // 【テストデータ準備】: 画面回転シミュレーションのためのデータ
-        val viewModel = EditScreenViewModel()
+        // 【TASK-0063 追加】: @Inject constructor(llmRewriteRepository, llmSettingsRepository) 化に伴い、
+        //                    本テストでは呼び出されない MockK スタブを渡してインスタンス化する 🔵
+        val viewModel = EditScreenViewModel(mockk<LlmRewriteRepository>(), mockk<LlmSettingsRepository>())
         val processed = com.den4dr.share2Obsidian.content.ProcessedContent(
             body = "共有テキスト",
             title = "元のタイトル",

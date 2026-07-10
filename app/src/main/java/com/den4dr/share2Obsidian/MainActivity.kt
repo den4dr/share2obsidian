@@ -101,10 +101,20 @@ class MainActivity : ComponentActivity() {
             // vault/folder は DataStore のグローバル設定から取得する（REQ-031）
             val noteSettings = noteSettingsRepository.getSettings().first()
             val config = TemplateApplicator.buildConfig(noteSettings)
+            // 【元コンテンツ退避】: テンプレート適用前の processed.body を退避する（REQ-406, LLM 入力用）🔵
+            val sourceContent = processed.body
+            // 【LLMプロンプト算出】: defaultTemplate が null の場合は空文字にフォールバックする（REQ-102）🔵
+            val bodyLlmPrompt = defaultTemplate?.bodyLlmPrompt.orEmpty()
             // 本文テンプレートの {{content}} を共有コンテンツで解決する（REQ-032）
             val resolvedBody = TemplateApplicator.buildBody(defaultTemplate, processed.body)
             val customFields = TemplateApplicator.buildCustomFields(defaultTemplate, processed)
-            viewModel.initialize(processed.copy(body = resolvedBody), config, customFields)
+            viewModel.initialize(
+                processed = processed.copy(body = resolvedBody),
+                config = config,
+                customFields = customFields,
+                sourceContent = sourceContent,
+                bodyLlmPrompt = bodyLlmPrompt,
+            )
 
             setContent {
                 // rememberSaveable で画面回転後も状態を復元する（EDGE-101）
